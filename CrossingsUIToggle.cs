@@ -19,10 +19,10 @@ namespace Crossings
 
 		public override void Start()
 		{
-			Debug.Log("Start()\n");
+			Debug.Log("Start()");
 			base.Start();
-			this.text = "Xings";
-			this.transformPosition = new Vector3(-0.55f, 0.97f);
+			this.text = "Crossings";
+			this.transformPosition = new Vector3(-1.55f, 0.97f);
 			this.normalBgSprite = "ButtonMenu";
 			this.disabledBgSprite = "ButtonMenuDisabled";
 			this.hoveredBgSprite = "ButtonMenuHovered";
@@ -35,23 +35,26 @@ namespace Crossings
 			this.eventClick += ButtonClick;
 			this.width = 60;
 			this.height = 30;
+			this.cachedName = "CrossingsUIToggle";
 		}
 
 		public void BeginCrossingSelect()
 		{
-			Debug.Log("BeginCrossingSelect()\n");
-			crossingSelector = new GameObject("NetTool");
-			NetTool nodeSelector = crossingSelector.AddComponent<NetTool>();
-			//segmentSelector.button = this;
+			Debug.Log("BeginCrossingSelect()");
+			crossingSelector = new GameObject("NodeSelector");
+			NodeSelector nodeSelector = crossingSelector.AddComponent<NodeSelector>();
+			nodeSelector.button = this;
 			this.textColor = new Color32(0, 255, 0, 255);
 			crossingSelectEnabled = true;
+			Debug.Log("BeginCrossingSelect() end\n");
 		}
 
 		public void CancelCrossingSelect()
 		{
-			Debug.Log("CancelCrossingSelect()\n");
+			Debug.Log("CancelCrossingSelect()");
 			ToolController toolController = GameObject.FindObjectOfType<ToolController>();
 			toolController.CurrentTool = toolController.GetComponent<DefaultTool>();
+			crossingSelectEnabled = false;
 		}
 
 		private void ButtonClick(UIComponent component, UIMouseEventParameter eventParam)

@@ -1,4 +1,3 @@
-using System;
 using ICities;
 using UnityEngine;
 using ColossalFramework.Plugins;
@@ -16,21 +15,33 @@ namespace Crossings {
 			get { return "Adds placeable pedestrian (zebra) crossings"; }
 		}
 	}
-
+	 
 	public class loader : LoadingExtensionBase {
-		public override void OnLevelLoaded (LoadMode mode) {
-			UIView.GetAView().AddUIComponent(typeof(CrossingsUIToggle));
-			Debug.Log("Crossings loaded\n");
+		UIComponent uiComponent;
+
+		public override void OnCreated(ILoading loading)
+		{
+			Debug.Log ("OnCreated()");
+			base.OnCreated (loading);
+			Debug.Log ("OnCreated() complete");
 		}
+
+		public override void OnReleased()
+		{
+			Debug.Log ("OnReleased()");
+			base.OnReleased ();
+			Debug.Log ("OnReleased() complete");
+		}
+
+		public override void OnLevelLoaded (LoadMode mode)
+		{
+			Debug.Log("Crossings loading...");
+			uiComponent = UIView.GetAView().AddUIComponent (typeof(CrossingsUIToggle));
+			Debug.Log("Crossings loaded");
+		}
+
 	}
 
-	public class crossing : PedestrianPathAI {
-		public override ToolBase.ToolErrors CheckBuildPosition (bool test, bool visualize, bool overlay, bool autofix, ref NetTool.ControlPoint startPoint, ref NetTool.ControlPoint middlePoint, ref NetTool.ControlPoint endPoint, out BuildingInfo ownerBuilding, out Vector3 ownerPosition, out Vector3 ownerDirection, out int productionRate)
-		{
-			Debug.Log("CheckBuildPosition called\n");
-			return base.CheckBuildPosition (test, visualize, overlay, autofix, ref startPoint, ref middlePoint, ref endPoint, out ownerBuilding, out ownerPosition, out ownerDirection, out productionRate);
-		}
-	}
 	/* 
 
 	NetManager instance = Singleton<NetManager>.instance;
