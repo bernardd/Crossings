@@ -1,6 +1,6 @@
 ﻿/*
  * NodeSelector.cs - Defines the node selector tool
- * 
+ *
  */
 using UnityEngine;
 //using UnityEngine.EventSystems;
@@ -16,7 +16,7 @@ using ColossalFramework.Globalization;
 
 namespace Crossings
 {
-	public class NodeSelector : ToolBase
+	public class CrossingTool : ToolBase
 	{
 		public CrossingsUIToggle button;
 		public ushort currentNode;
@@ -37,7 +37,7 @@ namespace Crossings
 			m_cacheLock = new object();
 		}
 
-		private ushort GetSegmentAtCursor() 
+		private ushort GetSegmentAtCursor()
 		{
 			Vector3 mousePosition = Input.mousePosition;
 			RaycastInput input = new RaycastInput(Camera.main.ScreenPointToRay(mousePosition), Camera.main.farClipPlane);
@@ -56,9 +56,24 @@ namespace Crossings
 			}
 		}
 
-		//TODO: Mirror NetTool:OnToolGUI()
+		protected override void OnToolGUI()
+		{
+			bool isInsideUI = this.m_toolController.IsInsideUI;
+			Event current = Event.current;
+			if (current.type == EventType.MouseDown && !isInsideUI && current.button == 0)
+			{
+				if (this.m_cachedErrors == ToolBase.ToolErrors.None)
+				{
+					Singleton<SimulationManager>.instance.AddAction<bool>(this.CreateCrossing());
+				}
+				else
+				{
+				//	Singleton<SimulationManager>.instance.AddAction(this.CreateFailed());
+				}
+			}
+		}
 
-		override protected void OnToolUpdate() 
+		override protected void OnToolUpdate()
 		{
 			while (!Monitor.TryEnter(this.m_cacheLock, SimulationManager.SYNCHRONIZE_TIMEOUT)) {}
 			try {
@@ -77,12 +92,6 @@ namespace Crossings
 				m_prefab = PrefabCollection<NetInfo>.GetPrefab (segment.m_infoIndex);
 			} else {
 				m_prefab = null;
-			}
-
-			if (Input.GetMouseButtonDown (0) && !this.m_toolController.IsInsideUI) {
-				if (segmentID != 0) {
-					// Do clicky stuff here...
-				}
 			}
 		}
 
@@ -232,6 +241,14 @@ namespace Crossings
 			m_mouseRayValid = false;
 			base.OnDisable();
 		}
+
+		private bool CreateNode(bool switchDirection)
+		{
+			//TODO: See NetTool.CreateNode[Impl]
+			return true;
+		}
+
 	}
 }
+
 

@@ -41,9 +41,9 @@ namespace Crossings
 		public void BeginCrossingSelect()
 		{
 			Debug.Log("BeginCrossingSelect()");
-			crossingSelector = new GameObject("NodeSelector");
-			NodeSelector nodeSelector = crossingSelector.AddComponent<NodeSelector>();
-			nodeSelector.button = this;
+			crossingSelector = new GameObject("CrossingTool");
+			CrossingTool crossingTool = crossingSelector.AddComponent<CrossingTool>();
+			crossingTool.button = this;
 			this.textColor = new Color32(0, 255, 0, 255);
 			crossingSelectEnabled = true;
 			Debug.Log("BeginCrossingSelect() end\n");
