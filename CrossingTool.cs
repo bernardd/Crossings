@@ -5,14 +5,11 @@
 using UnityEngine;
 //using UnityEngine.EventSystems;
 
-using System;
 using System.Threading;
-using System.Reflection;
 using System.Collections;
 
 using ColossalFramework;
 using ColossalFramework.Math;
-using ColossalFramework.Globalization;
 
 namespace Crossings
 {
@@ -27,7 +24,9 @@ namespace Crossings
 		Ray m_mouseRay;
 		float m_mouseRayLength;
 		bool m_mouseRayValid;
+		ushort m_lastNewNode;
 		NetInfo m_prefab;
+		ushort m_currentNodeID, m_currentSegmentID;
 
 		private object m_cacheLock;
 
@@ -37,22 +36,26 @@ namespace Crossings
 			m_cacheLock = new object();
 		}
 
-		private ushort GetSegmentAtCursor()
+		private void GetNetAtCursor()
 		{
 			Vector3 mousePosition = Input.mousePosition;
 			RaycastInput input = new RaycastInput(Camera.main.ScreenPointToRay(mousePosition), Camera.main.farClipPlane);
 			RaycastOutput output;
 			input.m_netService = new RaycastService(ItemClass.Service.Road, ItemClass.SubService.None, ItemClass.Layer.Default);
 			input.m_ignoreSegmentFlags = NetSegment.Flags.None;
+			input.m_ignoreNodeFlags = NetNode.Flags.None;
 			input.m_ignoreTerrain = true;
 			if (RayCast(input, out output))
 			{
-				Debug.Log("Found segment " + output.m_netSegment);
-				return output.m_netSegment;
+				//Debug.Log("Found segment " + output.m_netSegment);
+				//Debug.Log("Found node " + output.m_netNode);
+				m_currentNodeID = output.m_netNode;
+				m_currentSegmentID = output.m_netSegment;
 			}
 			else
 			{
-				return 0;
+				m_currentNodeID = 0;
+				m_currentSegmentID = 0;
 			}
 		}
 
@@ -62,9 +65,9 @@ namespace Crossings
 			Event current = Event.current;
 			if (current.type == EventType.MouseDown && !isInsideUI && current.button == 0)
 			{
-				if (this.m_cachedErrors == ToolBase.ToolErrors.None)
+				if (this.m_cachedErrors == ToolBase.ToolErrors.None && m_currentSegmentID != 0)
 				{
-					Singleton<SimulationManager>.instance.AddAction<bool>(this.CreateCrossing());
+					m_lastNewNode = CreateCrossing();
 				}
 				else
 				{
@@ -85,10 +88,10 @@ namespace Crossings
 
 			base.OnToolUpdate();
 			// Cast ray, find node
-			ushort segmentID = GetSegmentAtCursor ();
+			GetNetAtCursor ();
 
-			if (segmentID != 0) {
-				NetSegment segment = NetManager.instance.m_segments.m_buffer [segmentID];
+			if (m_currentSegmentID != 0) {
+				NetSegment segment = NetManager.instance.m_segments.m_buffer [m_currentSegmentID];
 				m_prefab = PrefabCollection<NetInfo>.GetPrefab (segment.m_infoIndex);
 			} else {
 				m_prefab = null;
@@ -97,6 +100,8 @@ namespace Crossings
 
 		protected override void OnToolLateUpdate()
 		{
+			CrossingMaker.AddFlagsToNode (m_lastNewNode);
+			m_lastNewNode = 0;
 			if (m_prefab == null)
 			{
 				return;
@@ -163,19 +168,9 @@ namespace Crossings
 
 		}
 
-		private static void AddCrossings(NetLane.Flags flag, NetInfo.Direction direction, NetNode node)
-		{
-			NetManager netManager = NetManager.instance;
-			NetInfo info = node.Info;
-			foreach (NetInfo.Lane lane in info.m_lanes)
-			{
-				lane.m_laneType |= NetInfo.LaneType.Pedestrian;
-			}
-		}
-
 		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo)
 		{
-			Debug.Log ("Render Overlay");
+			//Debug.Log ("Render Overlay");
 			base.RenderOverlay(cameraInfo);
 
 			if (!this.m_toolController.IsInsideUI && Cursor.visible) {  /* && (this.m_cachedErrors & (ToolBase.ToolErrors.RaycastFailed | ToolBase.ToolErrors.Pending)) == ToolBase.ToolErrors.None*/
@@ -205,7 +200,7 @@ namespace Crossings
 					segment.b = new Vector3 (-100000f, 0f, -100000f);
 
 					ToolManager toolManager = Singleton<ToolManager>.instance;
-					toolManager.m_drawCallData.m_overlayCalls = toolManager.m_drawCallData.m_overlayCalls + 1;
+					toolManager.m_drawCallData.m_overlayCalls++;
 					Singleton<RenderManager>.instance.OverlayEffect.DrawBezier (cameraInfo, toolColor2, bezier, m_prefab.m_halfWidth * 2f, -100000f, -100000f, -1f, 1280f, false, false);
 
 					if (this.m_cachedErrors == ToolBase.ToolErrors.None && Vector3.SqrMagnitude (bezier.d - bezier.a) >= 1f) {
@@ -242,12 +237,12 @@ namespace Crossings
 			base.OnDisable();
 		}
 
-		private bool CreateNode(bool switchDirection)
+		private ushort CreateCrossing()
 		{
-			//TODO: See NetTool.CreateNode[Impl]
-			return true;
+			//Debug.Log("CreateCrossing");
+			Debug.Log("Create Crossing node: " + m_currentNodeID + " segment: " + m_currentSegmentID);
+			return CrossingMaker.MakeCrossing(m_currentNodeID, m_prefab, m_controlPoint);
 		}
-
 	}
 }
 
