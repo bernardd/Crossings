@@ -100,7 +100,7 @@ namespace Crossings
 
 		protected override void OnToolLateUpdate()
 		{
-			CrossingMaker.AddFlagsToNode (m_lastNewNode);
+			CrossingMaker.AddFlagsToNode (m_lastNewNode); // TODO: This needs to go somewhere else
 			m_lastNewNode = 0;
 			if (m_prefab == null)
 			{
