@@ -1,6 +1,8 @@
 using ICities;
 using ColossalFramework.UI;
 using UnityEngine;
+using System;
+using System.Reflection;
 
 namespace Crossings {
 	public class CrossingsInfo : IUserMod {
@@ -61,7 +63,7 @@ namespace Crossings {
 				
 				NetTool.CreateNode (prefab, controlPoint, controlPoint, controlPoint, NetTool.m_nodePositionsSimulation, 0, false, false, true, false, false, false, 0, out newNode, out newSegment, out cost, out productionRate);
 				Debug.Log ("CreateNode real result: " + errors + " " + newNode + " " + newSegment + " " + cost + " " + productionRate);
-				Debug.Log ("Created Node: " + NetManager.instance.m_nodes.m_buffer [node].m_flags);
+//				Debug.Log ("Created Node: " + NetManager.instance.m_nodes.m_buffer [node].m_flags);
 				return newNode;
 			} else {
 				if ((NetManager.instance.m_nodes.m_buffer [currentNode].m_flags &
@@ -99,7 +101,7 @@ namespace Crossings {
 		public static void AddFlagsToNode(ushort node) {
 			if (node != 0) {
 				int checkCount = 0;
-				for (int i=0; i<8; i++) {
+			/*	for (int i=0; i<8; i++) {
 					ushort segmentID = NetManager.instance.m_nodes.m_buffer [node].GetSegment (i);
 					if (segmentID != 0) {
 						NetSegment[] segBuf = NetManager.instance.m_segments.m_buffer;	
@@ -116,10 +118,25 @@ namespace Crossings {
 				}
 				if (checkCount != 2)
 					Debug.Log ("BAD: Not exactly two segments connecting to the new node");
+					*/
 			}
-			NetManager.instance.m_nodes.m_buffer [node].m_flags |= NetNode.Flags.TrafficLights | NetNode.Flags.Junction | NetNode.Flags.Untouchable;
+			NetManager.instance.m_nodes.m_buffer [node].m_flags |= (NetNode.Flags)CrossingsNode.CrossingFlag;
 		}
 	}
+
+	public static class Util
+	{
+		public static MethodInfo GetMethod(Type type, string name, int pCount)
+		{
+			MethodInfo[] methods = type.GetMethods (BindingFlags.NonPublic | BindingFlags.Instance);
+			foreach (MethodInfo m in methods) {
+				if (m.Name == name && m.GetParameters ().Length == pCount)
+					return m;
+			}
+			return null;
+		}
+	}
+
 
 	/* 
 
