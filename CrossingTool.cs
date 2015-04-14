@@ -1,13 +1,5 @@
-﻿/*
- * NodeSelector.cs - Defines the node selector tool
- *
- */
-using UnityEngine;
-//using UnityEngine.EventSystems;
-
+﻿using UnityEngine;
 using System.Threading;
-using System.Collections;
-
 using ColossalFramework;
 using ColossalFramework.Math;
 
@@ -16,7 +8,7 @@ namespace Crossings
 	public class CrossingTool : ToolBase
 	{
 		public CrossingsUIToggle button;
-		public ushort currentNode;
+		public ushort m_currentNode;
 		NetTool.ControlPoint m_controlPoint;
 		NetTool.ControlPoint m_cachedControlPoint;
 		ToolErrors m_buildErrors;
@@ -24,7 +16,6 @@ namespace Crossings
 		Ray m_mouseRay;
 		float m_mouseRayLength;
 		bool m_mouseRayValid;
-		ushort m_lastNewNode;
 		NetInfo m_prefab;
 		ushort m_currentNodeID, m_currentSegmentID;
 
@@ -67,7 +58,7 @@ namespace Crossings
 			{
 				if (this.m_cachedErrors == ToolBase.ToolErrors.None && m_currentSegmentID != 0)
 				{
-					m_lastNewNode = CreateCrossing();
+					CreateCrossing();
 				}
 				else
 				{
@@ -100,8 +91,6 @@ namespace Crossings
 
 		protected override void OnToolLateUpdate()
 		{
-			CrossingMaker.AddFlagsToNode (m_lastNewNode); // TODO: This needs to go somewhere else
-			m_lastNewNode = 0;
 			if (m_prefab == null)
 			{
 				return;
@@ -237,11 +226,32 @@ namespace Crossings
 			base.OnDisable();
 		}
 
-		private ushort CreateCrossing()
+		private void CreateCrossing()
 		{
-			//Debug.Log("CreateCrossing");
-			Debug.Log("Create Crossing node: " + m_currentNodeID + " segment: " + m_currentSegmentID);
-			return CrossingMaker.MakeCrossing(m_currentNodeID, m_prefab, m_controlPoint);
+			ushort node = 0;
+			if (m_currentNode == 0) {
+				ushort newSegment;
+				int cost, productionRate;
+				ToolBase.ToolErrors errors = NetTool.CreateNode (m_prefab, m_controlPoint, m_controlPoint, m_controlPoint, NetTool.m_nodePositionsSimulation, 0, true, false, true, false, false, false, 0, out node, out newSegment, out cost, out productionRate);
+				Debug.Log ("CreateNode test result: " + errors + " " + node + " " + newSegment + " " + cost + " " + productionRate);
+				if (errors != ToolBase.ToolErrors.None)
+					return;
+
+				NetTool.CreateNode (m_prefab, m_controlPoint, m_controlPoint, m_controlPoint, NetTool.m_nodePositionsSimulation, 0, false, false, true, false, false, false, 0, out node, out newSegment, out cost, out productionRate);
+				Debug.Log ("CreateNode real result: " + errors + " " + node + " " + newSegment + " " + cost + " " + productionRate);
+
+			} else {
+				if ((NetManager.instance.m_nodes.m_buffer [m_currentNode].m_flags &
+					(NetNode.Flags.End | NetNode.Flags.Junction | NetNode.Flags.Bend)) == NetNode.Flags.None) {
+					node = m_currentNode;
+					Debug.Log ("Existing Node: " + node + " " + NetManager.instance.m_nodes.m_buffer [node].m_flags);
+				} else {
+					Debug.Log ("End, bend or intersection node - ignoring " + m_currentNode);
+				}
+			}
+
+			if (node != 0)
+				NetManager.instance.m_nodes.m_buffer [node].m_flags |= (NetNode.Flags)CrossingsNode.CrossingFlag;
 		}
 	}
 }

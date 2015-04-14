@@ -1,7 +1,5 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using ColossalFramework;
 
@@ -9,7 +7,7 @@ namespace Crossings
 {
 	public class CrossingsNode
 	{
-		public static int CrossingFlag = (int)NetNode.Flags.OneWayIn << 1; // Last item in the enum moved one bit
+		public static int CrossingFlag = (int)NetNode.Flags.OneWayIn << 1; // Largest item in the enum moved one bit
 		static bool hooked = false;
 		static private Dictionary<MethodInfo, RedirectCallsState> redirects = new Dictionary<MethodInfo, RedirectCallsState>();
 
