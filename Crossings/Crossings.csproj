@@ -61,9 +61,11 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <None Include="TODO.txt" />
+    <EmbeddedResource Include="sprites.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="sprites.png" />
+    <None Include="..\TODO.txt">
+      <Link>TODO.txt</Link>
+    </None>
   </ItemGroup>
 </Project>

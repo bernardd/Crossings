@@ -7,6 +7,7 @@
 * Minimse code copied from game where possible
 * Why the hell are trees appearing on the road occasionally?
 * Occasional ArrayIndexOutOfRange exception (maybe fixed now?)
+* Don't display tool circle anywhere you can't place a crossing
 
 What works:
 * Baisic placement and fuctionality
