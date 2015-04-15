@@ -7,8 +7,6 @@ namespace Crossings
 {
 	public class CrossingTool : ToolBase
 	{
-		public CrossingsUIToggle button;
-		public ushort m_currentNode;
 		NetTool.ControlPoint m_controlPoint;
 		NetTool.ControlPoint m_cachedControlPoint;
 		ToolErrors m_buildErrors;
@@ -54,16 +52,24 @@ namespace Crossings
 		{
 			bool isInsideUI = this.m_toolController.IsInsideUI;
 			Event current = Event.current;
-			if (current.type == EventType.MouseDown && !isInsideUI && current.button == 0)
+			if (current.type == EventType.MouseDown && !isInsideUI)
 			{
-				if (this.m_cachedErrors == ToolBase.ToolErrors.None && m_currentSegmentID != 0)
-				{
-					CreateCrossing();
+				if (current.button == 0) { // LMB// LMB
+					if (this.m_cachedErrors == ToolBase.ToolErrors.None && m_currentSegmentID != 0) {
+						CreateCrossing ();
+					} else {
+						//	Singleton<SimulationManager>.instance.AddAction(this.CreateFailed());
+					}
+				} else if (current.button == 1) { // RMB
+					Debug.Log("Got RMB...");
+					if (this.m_cachedErrors == ToolBase.ToolErrors.None && m_currentSegmentID != 0) {
+						Debug.Log("Trying to remove crossing " + m_currentNodeID);	
+						RemoveCrossing ();
+					} else {
+						//	Singleton<SimulationManager>.instance.AddAction(this.CreateFailed());
+					}
 				}
-				else
-				{
-				//	Singleton<SimulationManager>.instance.AddAction(this.CreateFailed());
-				}
+
 			}
 		}
 
@@ -221,7 +227,7 @@ namespace Crossings
 			base.ToolCursor = null;
 			m_buildErrors = ToolBase.ToolErrors.Pending;
 			m_cachedErrors = ToolBase.ToolErrors.Pending;
-			button.textColor = new Color32(255, 255, 255, 255);
+			// FIXME: button.textColor = new Color32(255, 255, 255, 255);
 			m_mouseRayValid = false;
 			base.OnDisable();
 		}
@@ -229,7 +235,7 @@ namespace Crossings
 		private void CreateCrossing()
 		{
 			ushort node = 0;
-			if (m_currentNode == 0) {
+			if (m_currentNodeID == 0) {
 				ushort newSegment;
 				int cost, productionRate;
 				ToolBase.ToolErrors errors = NetTool.CreateNode (m_prefab, m_controlPoint, m_controlPoint, m_controlPoint, NetTool.m_nodePositionsSimulation, 0, true, false, true, false, false, false, 0, out node, out newSegment, out cost, out productionRate);
@@ -241,17 +247,26 @@ namespace Crossings
 				Debug.Log ("CreateNode real result: " + errors + " " + node + " " + newSegment + " " + cost + " " + productionRate);
 
 			} else {
-				if ((NetManager.instance.m_nodes.m_buffer [m_currentNode].m_flags &
+				if ((NetManager.instance.m_nodes.m_buffer [m_currentNodeID].m_flags &
 					(NetNode.Flags.End | NetNode.Flags.Junction | NetNode.Flags.Bend)) == NetNode.Flags.None) {
-					node = m_currentNode;
+					node = m_currentNodeID;
 					Debug.Log ("Existing Node: " + node + " " + NetManager.instance.m_nodes.m_buffer [node].m_flags);
 				} else {
-					Debug.Log ("End, bend or intersection node - ignoring " + m_currentNode);
+					Debug.Log ("End, bend or intersection node - ignoring " + m_currentNodeID);
 				}
 			}
 
 			if (node != 0)
 				NetManager.instance.m_nodes.m_buffer [node].m_flags |= (NetNode.Flags)CrossingsNode.CrossingFlag;
+		}
+
+
+		private void RemoveCrossing()
+		{
+			if (m_currentNodeID != 0) {
+				NetManager.instance.m_nodes.m_buffer [m_currentNodeID].m_flags &= ~(NetNode.Flags)CrossingsNode.CrossingFlag;
+				NetManager.instance.UpdateNode (m_currentNodeID, 0, 0);
+			}
 		}
 	}
 }

@@ -57,9 +57,13 @@
     <Compile Include="CrossingTool.cs" />
     <Compile Include="Detours.cs" />
     <Compile Include="CrossingsNode.cs" />
+    <Compile Include="UIUtils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <None Include="TODO.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="sprites.png" />
   </ItemGroup>
 </Project>
