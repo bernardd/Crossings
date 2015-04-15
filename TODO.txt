@@ -1,14 +1,14 @@
 ﻿* Fix up rendering so that there's just one big crossing rather than two bendy ones
 * Fix handling on the edge of bend nodes
-* Add a way to remove crossings (RMB)
 * Fix UI icon to fit in the circle
 * Clean up tool code to just use circles rather than beziers (see ToggleTrafficLights tool for example)
 * Figure out why the road flickers on placement
 * Filter tool to only work on roads (except highways)
 * Minimse code copied from game where possible
 * Why the hell are trees appearing on the road occasionally?
-* Occasional ArrayIndexOutOfRange exception
+* Occasional ArrayIndexOutOfRange exception (maybe fixed now?)
 
 What works:
 * Baisic placement and fuctionality
+* Removal with RMB
 * Traffic lights on larger roads
