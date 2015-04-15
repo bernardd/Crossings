@@ -266,6 +266,7 @@ namespace Crossings
 			if (m_currentNodeID != 0) {
 				NetManager.instance.m_nodes.m_buffer [m_currentNodeID].m_flags &= ~(NetNode.Flags)CrossingsNode.CrossingFlag;
 				NetManager.instance.UpdateNode (m_currentNodeID, 0, 0);
+				m_currentNodeID = 0;
 			}
 		}
 	}
