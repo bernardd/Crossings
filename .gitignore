@@ -75,3 +75,5 @@ $RECYCLE.BIN/
 bin
 obj
 Reference
+
+*.userprefs

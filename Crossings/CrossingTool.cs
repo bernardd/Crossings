@@ -169,45 +169,22 @@ namespace Crossings
 			base.RenderOverlay(cameraInfo);
 
 			if (!this.m_toolController.IsInsideUI && Cursor.visible) {  /* && (this.m_cachedErrors & (ToolBase.ToolErrors.RaycastFailed | ToolBase.ToolErrors.Pending)) == ToolBase.ToolErrors.None*/
-				NetTool.ControlPoint controlPoint;
-				controlPoint = this.m_cachedControlPoint;
+				NetTool.ControlPoint controlPoint = this.m_cachedControlPoint;
 
-				Color toolColor2 = base.GetToolColor (false, this.m_cachedErrors != ToolBase.ToolErrors.None);
-				Color toolColor3 = base.GetToolColor (true, false);
-				this.m_toolController.RenderColliding (cameraInfo, toolColor2, toolColor3, toolColor2, toolColor3, 0, 0);
-				Vector3 position = controlPoint.m_position;
+				Color goodColour = base.GetToolColor (false, false);
+				Color badColour = base.GetToolColor (true, false);
+				//this.m_toolController.RenderColliding (cameraInfo, toolColor2, toolColor3, toolColor2, toolColor3, 0, 0);
 				BuildingInfo buildingInfo;
 				Vector3 vector;
 				Vector3 vector2;
 				int num3;
+
 				if (m_prefab != null) {
 					m_prefab.m_netAI.CheckBuildPosition (false, false, true, true, ref controlPoint, ref controlPoint, ref controlPoint, out buildingInfo, out vector, out vector2, out num3);
-					bool flag = position != controlPoint.m_position;
-					Bezier3 bezier;
-					bezier.a = controlPoint.m_position;
-					bezier.d = controlPoint.m_position;
-					bool smoothStart = true;
-					bool smoothEnd = true;
-					NetSegment.CalculateMiddlePoints (bezier.a, controlPoint.m_direction, bezier.d, -controlPoint.m_direction, smoothStart, smoothEnd, out bezier.b, out bezier.c);
-					Segment3 segment;
-
-					segment.a = new Vector3 (-100000f, 0f, -100000f);
-					segment.b = new Vector3 (-100000f, 0f, -100000f);
 
 					ToolManager toolManager = Singleton<ToolManager>.instance;
 					toolManager.m_drawCallData.m_overlayCalls++;
-					Singleton<RenderManager>.instance.OverlayEffect.DrawBezier (cameraInfo, toolColor2, bezier, m_prefab.m_halfWidth * 2f, -100000f, -100000f, -1f, 1280f, false, false);
-
-					if (this.m_cachedErrors == ToolBase.ToolErrors.None && Vector3.SqrMagnitude (bezier.d - bezier.a) >= 1f) {
-						float radius;
-						bool capped;
-						Color color;
-						m_prefab.m_netAI.GetEffectRadius (out radius, out capped, out color);
-						if (radius > m_prefab.m_halfWidth) {
-							toolManager.m_drawCallData.m_overlayCalls = toolManager.m_drawCallData.m_overlayCalls + 1;
-							Singleton<RenderManager>.instance.OverlayEffect.DrawBezier (cameraInfo, color, bezier, radius * 2f, (!capped) ? -100000f : radius, (!capped) ? -100000f : radius, -1f, 1280f, false, true);
-						}
-					}
+					Singleton<RenderManager>.instance.OverlayEffect.DrawCircle (cameraInfo, goodColour, m_controlPoint.m_position, m_prefab.m_halfWidth * 2f, -100000f, 1280f, false, false);
 				}
 			}
 		}
