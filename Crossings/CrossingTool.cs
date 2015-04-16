@@ -171,9 +171,6 @@ namespace Crossings
 			if (!this.m_toolController.IsInsideUI && Cursor.visible) {  /* && (this.m_cachedErrors & (ToolBase.ToolErrors.RaycastFailed | ToolBase.ToolErrors.Pending)) == ToolBase.ToolErrors.None*/
 				NetTool.ControlPoint controlPoint = this.m_cachedControlPoint;
 
-				Color goodColour = base.GetToolColor (false, false);
-				Color badColour = base.GetToolColor (true, false);
-				//this.m_toolController.RenderColliding (cameraInfo, toolColor2, toolColor3, toolColor2, toolColor3, 0, 0);
 				BuildingInfo buildingInfo;
 				Vector3 vector;
 				Vector3 vector2;
@@ -182,9 +179,15 @@ namespace Crossings
 				if (m_prefab != null) {
 					m_prefab.m_netAI.CheckBuildPosition (false, false, true, true, ref controlPoint, ref controlPoint, ref controlPoint, out buildingInfo, out vector, out vector2, out num3);
 
+					Color colour;
+					if (CanBuild (m_currentSegmentID, m_currentNodeID))
+						colour = base.GetToolColor (false, false);
+					else
+						colour = base.GetToolColor (true, false);
+
 					ToolManager toolManager = Singleton<ToolManager>.instance;
 					toolManager.m_drawCallData.m_overlayCalls++;
-					Singleton<RenderManager>.instance.OverlayEffect.DrawCircle (cameraInfo, goodColour, m_controlPoint.m_position, m_prefab.m_halfWidth * 2f, -100000f, 1280f, false, false);
+					Singleton<RenderManager>.instance.OverlayEffect.DrawCircle (cameraInfo, colour, m_controlPoint.m_position, m_prefab.m_halfWidth * 2f, -100000f, 1280f, false, false);
 				}
 			}
 		}
@@ -204,7 +207,6 @@ namespace Crossings
 			base.ToolCursor = null;
 			m_buildErrors = ToolBase.ToolErrors.Pending;
 			m_cachedErrors = ToolBase.ToolErrors.Pending;
-			// FIXME: button.textColor = new Color32(255, 255, 255, 255);
 			m_mouseRayValid = false;
 			base.OnDisable();
 		}
@@ -212,24 +214,20 @@ namespace Crossings
 		private void CreateCrossing()
 		{
 			ushort node = 0;
-			if (m_currentNodeID == 0) {
-				ushort newSegment;
-				int cost, productionRate;
-				ToolBase.ToolErrors errors = NetTool.CreateNode (m_prefab, m_controlPoint, m_controlPoint, m_controlPoint, NetTool.m_nodePositionsSimulation, 0, true, false, true, false, false, false, 0, out node, out newSegment, out cost, out productionRate);
-				Debug.Log ("CreateNode test result: " + errors + " " + node + " " + newSegment + " " + cost + " " + productionRate);
-				if (errors != ToolBase.ToolErrors.None)
-					return;
+			if (CanBuild (m_currentSegmentID, m_currentNodeID)) {
+				if (m_currentNodeID == 0) {
+					ushort newSegment;
+					int cost, productionRate;
+					ToolBase.ToolErrors errors = NetTool.CreateNode (m_prefab, m_controlPoint, m_controlPoint, m_controlPoint, NetTool.m_nodePositionsSimulation, 0, true, false, true, false, false, false, 0, out node, out newSegment, out cost, out productionRate);
+					Debug.Log ("CreateNode test result: " + errors + " " + node + " " + newSegment + " " + cost + " " + productionRate);
+					if (errors != ToolBase.ToolErrors.None)
+						return;
 
-				NetTool.CreateNode (m_prefab, m_controlPoint, m_controlPoint, m_controlPoint, NetTool.m_nodePositionsSimulation, 0, false, false, true, false, false, false, 0, out node, out newSegment, out cost, out productionRate);
-				Debug.Log ("CreateNode real result: " + errors + " " + node + " " + newSegment + " " + cost + " " + productionRate);
-
-			} else {
-				if ((NetManager.instance.m_nodes.m_buffer [m_currentNodeID].m_flags &
-					(NetNode.Flags.End | NetNode.Flags.Junction | NetNode.Flags.Bend)) == NetNode.Flags.None) {
+					NetTool.CreateNode (m_prefab, m_controlPoint, m_controlPoint, m_controlPoint, NetTool.m_nodePositionsSimulation, 0, false, false, true, false, false, false, 0, out node, out newSegment, out cost, out productionRate);
+					Debug.Log ("CreateNode real result: " + errors + " " + node + " " + newSegment + " " + cost + " " + productionRate);
+				} else {
 					node = m_currentNodeID;
 					Debug.Log ("Existing Node: " + node + " " + NetManager.instance.m_nodes.m_buffer [node].m_flags);
-				} else {
-					Debug.Log ("End, bend or intersection node - ignoring " + m_currentNodeID);
 				}
 			}
 
@@ -245,6 +243,30 @@ namespace Crossings
 				NetManager.instance.UpdateNode (m_currentNodeID, 0, 0);
 				m_currentNodeID = 0;
 			}
+		}
+
+		private bool CanBuild(ushort segmentID, ushort nodeID)
+		{
+			if (segmentID == 0)
+				return false;
+			
+			NetInfo info = NetManager.instance.m_segments.m_buffer [m_currentSegmentID].Info;
+			ItemClass.Level level = info.m_class.m_level;
+			if (!(info.m_netAI is RoadBaseAI))
+				return false; // No crossings on non-roads
+			
+			if (level == ItemClass.Level.Level5 || level == ItemClass.Level.Level1)
+				return false; // No crossings on freeways or dirt roads
+				
+			if (nodeID == 0)
+				return true; // No node means we can create one
+
+			NetNode.Flags flags = NetManager.instance.m_nodes.m_buffer [nodeID].m_flags;
+			if ((flags & (NetNode.Flags)CrossingsNode.CrossingFlag) != NetNode.Flags.None)
+				return true; // Already a crossing - can remove it
+
+			// Can't add crossing to the end, a junction (except a crossing one) or a bend
+			return (flags & (NetNode.Flags.End | NetNode.Flags.Junction | NetNode.Flags.Bend)) == NetNode.Flags.None;
 		}
 	}
 }

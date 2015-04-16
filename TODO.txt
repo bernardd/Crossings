@@ -1,14 +1,17 @@
-﻿* Fix up rendering so that there's just one big crossing rather than two bendy ones
-* Fix handling on the edge of bend nodes
+﻿TODO:
+* Fix up rendering so that there's just one big crossing rather than two bendy ones
 * Fix UI icon to fit in the circle
-* Figure out why the road flickers on placement
-* Filter tool to only work on roads (except highways)
 * Minimse code copied from game where possible
+* Tooltips about build failures
+
+Known Bugs:
+* Occasional ArrayIndexOutOfRange exception
 * Why the hell are trees appearing on the road occasionally?
-* Occasional ArrayIndexOutOfRange exception (maybe fixed now?)
-* Don't display tool circle anywhere you can't place a crossing
+* Road flickers on placement
+* Crossings show up as able to be placed on the end of corners, but don't appear
 
 What works:
 * Baisic placement and fuctionality
 * Removal with RMB
 * Traffic lights on larger roads
+* Tool will only appear blue where crossings can be added or removed
