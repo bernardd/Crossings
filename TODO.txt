@@ -1,13 +1,13 @@
 ﻿TODO:
-* Fix up rendering so that there's just one big crossing rather than two bendy ones
+* Fix up rendering on level 3 roads
 * Fix UI icon to fit in the circle
 * Minimse code copied from game where possible
 * Tooltips about build failures
+* Stop signposts appearing - it's not really a junction
 
 Known Bugs:
-* Occasional ArrayIndexOutOfRange exception
-* Why the hell are trees appearing on the road occasionally?
-* Road flickers on placement
+* Occasional ArrayIndexOutOfRange exception (possibly fixed now)
+* First placement causes road to flicker
 * Crossings show up as able to be placed on the end of corners, but sometimes don't appear until a later update
 
 What works:

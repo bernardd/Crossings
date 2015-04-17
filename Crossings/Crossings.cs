@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 using System.Reflection;
 
+
 namespace Crossings {
 	public class CrossingsInfo : IUserMod {
 		public string Name {
@@ -59,7 +60,6 @@ namespace Crossings {
 	}
 
 	public class ThreadingExtension : ThreadingExtensionBase {
-
 		public static ThreadingExtension Instance { get; private set; }
 
 		string[] twowayNames = { "Basic Road", "Large Road" };
@@ -181,8 +181,6 @@ namespace Crossings {
 				if (netTool == null)
 					return;
 
-				//			raycastService = new ToolBase.RaycastService(netTool.m_prefab.m_class.m_service, netTool.m_prefab.m_class.m_subService, netTool.m_prefab.m_class.m_layer);
-
 				Debug.Log ("UI visible: " + ui.isVisible);
 			}
 
@@ -205,5 +203,4 @@ namespace Crossings {
 		}
 
 	}
-
 }
