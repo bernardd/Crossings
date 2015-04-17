@@ -208,10 +208,11 @@ namespace Crossings
 			{
 				makeJunction = true;
 			}
-			if (isCrossing && makeMiddle)
+			if (isCrossing)
 			{
 				makeCrossing = true;
 			}
+				
 			NetNode.Flags flags = thisNode.m_flags & ~(NetNode.Flags.End | NetNode.Flags.Middle | NetNode.Flags.Bend | NetNode.Flags.Junction | NetNode.Flags.Moveable);
 			if ((flags & NetNode.Flags.Outside) != NetNode.Flags.None)
 			{
@@ -220,6 +221,9 @@ namespace Crossings
 			else if (makeJunction)
 			{
 				thisNode.m_flags = (flags | NetNode.Flags.Junction) & ~(NetNode.Flags)CrossingFlag;
+			}
+			else if (makeCrossing) {
+				thisNode.m_flags = flags | NetNode.Flags.Junction;
 			}
 			else if (makeBend)
 			{
@@ -232,10 +236,6 @@ namespace Crossings
 					flags |= NetNode.Flags.Moveable;
 				}
 				thisNode.m_flags = (flags | NetNode.Flags.Middle);
-
-				if (makeCrossing) {
-					thisNode.m_flags |= NetNode.Flags.Junction;
-				}
 			}
 			else if (hasSegments)
 			{
@@ -245,6 +245,8 @@ namespace Crossings
 				}
 				thisNode.m_flags = (flags | NetNode.Flags.End) & ~(NetNode.Flags)CrossingFlag;
 			}
+
+
 			thisNode.m_heightOffset = (byte)((!flag9) ? 64 : 0);
 			thisNode.m_connectCount = (byte)connections;
 			BuildingInfo newBuilding;
