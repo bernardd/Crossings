@@ -29,11 +29,8 @@ namespace Crossings
 					redirects.Add (m, RedirectionHelper.RedirectCalls (m, typeof(CrossingsNode).GetMethod ("RefreshJunctionData", allFlags)));
 					break;
 				}
-		//		if (m.Name == "RenderInstance" && m.GetParameters ().Length == 7) {
-		//			redirects.Add (m, RedirectionHelper.RedirectCalls (m, typeof(CrossingsNode).GetMethod ("RenderInstanceInner", allFlags)));
-		//		}
 			}
-*/
+
 			MethodInfo method = typeof(RoadBaseAI).GetMethod("UpdateNodeFlags", allFlags);
 			redirects.Add (method, RedirectionHelper.RedirectCalls (method, typeof(CrossingsNode).GetMethod ("UpdateNodeFlags", allFlags)));
 
@@ -66,6 +63,7 @@ namespace Crossings
 			bool makeMiddle = false;
 			bool makeBend = false;
 			bool makeJunction = false;
+			bool makeCrossing = false;
 			bool isBend = false;
 			bool isStraight = false;
 			bool flag7 = false;
@@ -212,7 +210,7 @@ namespace Crossings
 			}
 			if (isCrossing && makeMiddle)
 			{
-				makeJunction = true;
+				makeCrossing = true;
 			}
 			NetNode.Flags flags = thisNode.m_flags & ~(NetNode.Flags.End | NetNode.Flags.Middle | NetNode.Flags.Bend | NetNode.Flags.Junction | NetNode.Flags.Moveable);
 			if ((flags & NetNode.Flags.Outside) != NetNode.Flags.None)
@@ -221,7 +219,7 @@ namespace Crossings
 			}
 			else if (makeJunction)
 			{
-				thisNode.m_flags = (flags | NetNode.Flags.Junction);
+				thisNode.m_flags = (flags | NetNode.Flags.Junction) & ~(NetNode.Flags)CrossingFlag;
 			}
 			else if (makeBend)
 			{
@@ -234,6 +232,10 @@ namespace Crossings
 					flags |= NetNode.Flags.Moveable;
 				}
 				thisNode.m_flags = (flags | NetNode.Flags.Middle);
+
+				if (makeCrossing) {
+					thisNode.m_flags |= NetNode.Flags.Junction;
+				}
 			}
 			else if (hasSegments)
 			{
@@ -335,8 +337,8 @@ namespace Crossings
 			data.m_flags = flags;
 		}
 
-		#if false
-		public void RenderInstance(RenderManager.CameraInfo cameraInfo, ushort nodeID, int layerMask)
+		// NetNode override
+		private void RefreshJunctionData(ushort nodeID, int segmentIndex, ushort nodeSegment, Vector3 centerPos, ref uint instanceIndex, ref RenderManager.Instance data)
 		{
 			NetNode thisNode = NetManager.instance.m_nodes.m_buffer [nodeID];
 			NetManager instance = Singleton<NetManager>.instance;
@@ -413,6 +415,7 @@ namespace Crossings
 			netSegment.CalculateCorner(nodeSegment, true, start, true, out zero2, out zero4, out flag);
 			if (num3 != 0 && num4 != 0)
 			{
+
 				float num6 = info.m_pavementWidth / info.m_halfWidth * 0.5f;
 				float y = 1f;
 				if (num3 != 0)
@@ -451,12 +454,19 @@ namespace Crossings
 				Vector3 vector11;
 				Vector3 vector12;
 				NetSegment.CalculateMiddlePoints(zero2, -zero4, zero6, -zero8, true, true, out vector11, out vector12);
+
 				data.m_dataMatrix0 = NetSegment.CalculateControlMatrix(zero, vector5, vector6, vector, zero, vector5, vector6, vector, thisNode.m_position, vScale);
 				data.m_extraData.m_dataMatrix2 = NetSegment.CalculateControlMatrix(zero2, vector7, vector8, vector2, zero2, vector7, vector8, vector2, thisNode.m_position, vScale);
 				data.m_extraData.m_dataMatrix3 = NetSegment.CalculateControlMatrix(zero, vector9, vector10, zero5, zero, vector9, vector10, zero5, thisNode.m_position, vScale);
 				data.m_dataMatrix1 = NetSegment.CalculateControlMatrix(zero2, vector11, vector12, zero6, zero2, vector11, vector12, zero6, thisNode.m_position, vScale);
 				data.m_dataVector0 = new Vector4(0.5f / info.m_halfWidth, 1f / info.m_segmentLength, 0.5f - info.m_pavementWidth / info.m_halfWidth * 0.5f, info.m_pavementWidth / info.m_halfWidth * 0.5f);
 				data.m_dataVector1 = centerPos - data.m_position;
+
+				if ((thisNode.m_flags & (NetNode.Flags)CrossingFlag) == NetNode.Flags.None)
+					data.m_dataVector1.w = (data.m_dataMatrix0.m33 + data.m_extraData.m_dataMatrix2.m33 + data.m_extraData.m_dataMatrix3.m33 + data.m_dataMatrix1.m33) * 0.25f;
+				else
+					data.m_dataVector1.w = 0.01f;
+
 				data.m_dataVector2 = new Vector4(num6, y, num8, w);
 				data.m_extraData.m_dataVector4 = RenderManager.GetColorLocation(65536u + (uint)nodeID);
 			}
@@ -500,6 +510,7 @@ namespace Crossings
 			}
 			instanceIndex = (uint)data.m_nextInstance;
 		}
+		
 	}
 }
 
