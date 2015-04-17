@@ -213,7 +213,7 @@ namespace Crossings
 			{
 				makeJunction = true;
 			}
-			if (isCrossing)
+			if (isCrossing && makeMiddle)
 			{
 				makeJunction = true;
 			}
@@ -228,7 +228,7 @@ namespace Crossings
 			}
 			else if (makeBend)
 			{
-				thisNode.m_flags = (flags | NetNode.Flags.Bend);
+				thisNode.m_flags = (flags | NetNode.Flags.Bend) & ~(NetNode.Flags)CrossingFlag;
 			}
 			else if (makeMiddle)
 			{
@@ -244,7 +244,7 @@ namespace Crossings
 				{
 					flags |= NetNode.Flags.Moveable;
 				}
-				thisNode.m_flags = (flags | NetNode.Flags.End);
+				thisNode.m_flags = (flags | NetNode.Flags.End) & ~(NetNode.Flags)CrossingFlag;
 			}
 			thisNode.m_heightOffset = (byte)((!flag9) ? 64 : 0);
 			thisNode.m_connectCount = (byte)connections;
