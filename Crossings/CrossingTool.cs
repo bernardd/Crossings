@@ -1,7 +1,7 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using System.Threading;
 using ColossalFramework;
-using ColossalFramework.Math;
 
 namespace Crossings
 {
@@ -56,7 +56,7 @@ namespace Crossings
 			{
 				if (current.button == 0) { // LMB// LMB
 					if (this.m_cachedErrors == ToolBase.ToolErrors.None && m_currentSegmentID != 0) {
-						CreateCrossing ();
+						SimulationManager.instance.AddAction(this.CreateCrossing());
 					} else {
 						//	Singleton<SimulationManager>.instance.AddAction(this.CreateFailed());
 					}
@@ -64,7 +64,7 @@ namespace Crossings
 					Debug.Log("Got RMB...");
 					if (this.m_cachedErrors == ToolBase.ToolErrors.None && m_currentSegmentID != 0) {
 						Debug.Log("Trying to remove crossing " + m_currentNodeID);	
-						RemoveCrossing ();
+						SimulationManager.instance.AddAction(this.RemoveCrossing());
 					} else {
 						//	Singleton<SimulationManager>.instance.AddAction(this.CreateFailed());
 					}
@@ -129,7 +129,7 @@ namespace Crossings
 			ignoreNodeFlags = NetNode.Flags.None;
 			ignoreSegmentFlags = NetSegment.Flags.None;
 
-			Building.Flags ignoreBuildingFlags = Building.Flags.All; // Untouchable ?
+			Building.Flags ignoreBuildingFlags = Building.Flags.All;
 
 			if (m_prefab != null) {
 				if (this.m_mouseRayValid && NetTool.MakeControlPoint (this.m_mouseRay, this.m_mouseRayLength, m_prefab, false, ignoreNodeFlags, ignoreSegmentFlags, ignoreBuildingFlags, 0, out controlPoint)) {
@@ -210,8 +210,8 @@ namespace Crossings
 			m_mouseRayValid = false;
 			base.OnDisable();
 		}
-
-		private void CreateCrossing()
+			
+		private IEnumerator CreateCrossing()
 		{
 			ushort node = 0;
 			if (CanBuild (m_currentSegmentID, m_currentNodeID)) {
@@ -221,7 +221,7 @@ namespace Crossings
 					ToolBase.ToolErrors errors = NetTool.CreateNode (m_prefab, m_controlPoint, m_controlPoint, m_controlPoint, NetTool.m_nodePositionsSimulation, 0, true, false, true, false, false, false, 0, out node, out newSegment, out cost, out productionRate);
 					Debug.Log ("CreateNode test result: " + errors + " " + node + " " + newSegment + " " + cost + " " + productionRate);
 					if (errors != ToolBase.ToolErrors.None)
-						return;
+						yield return null;
 
 					NetTool.CreateNode (m_prefab, m_controlPoint, m_controlPoint, m_controlPoint, NetTool.m_nodePositionsSimulation, 0, false, false, true, false, false, false, 0, out node, out newSegment, out cost, out productionRate);
 					Debug.Log ("CreateNode real result: " + errors + " " + node + " " + newSegment + " " + cost + " " + productionRate);
@@ -233,16 +233,19 @@ namespace Crossings
 
 			if (node != 0)
 				NetManager.instance.m_nodes.m_buffer [node].m_flags |= (NetNode.Flags)CrossingsNode.CrossingFlag;
+				
+			yield return null;
 		}
 
 
-		private void RemoveCrossing()
+		private IEnumerator RemoveCrossing()
 		{
 			if (m_currentNodeID != 0) {
 				NetManager.instance.m_nodes.m_buffer [m_currentNodeID].m_flags &= ~(NetNode.Flags)CrossingsNode.CrossingFlag;
 				NetManager.instance.UpdateNode (m_currentNodeID, 0, 0);
 				m_currentNodeID = 0;
 			}
+			yield return null;
 		}
 
 		private bool CanBuild(ushort segmentID, ushort nodeID)

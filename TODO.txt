@@ -8,7 +8,7 @@ Known Bugs:
 * Occasional ArrayIndexOutOfRange exception
 * Why the hell are trees appearing on the road occasionally?
 * Road flickers on placement
-* Crossings show up as able to be placed on the end of corners, but don't appear
+* Crossings show up as able to be placed on the end of corners, but sometimes don't appear until a later update
 
 What works:
 * Baisic placement and fuctionality
