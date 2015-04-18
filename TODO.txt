@@ -7,9 +7,7 @@
 * Look at highlighting buildings that will be knocked down (can happen on curved roads)
 
 Known Bugs:
-* Occasional ArrayIndexOutOfRange exception (possibly fixed now)
 * First placement causes road to flicker
-* Crossings show up as able to be placed on the end of corners, but sometimes don't appear until a later update
 * Overlay renders messily sometimes
 
 What works:
