@@ -67,5 +67,8 @@
     <None Include="..\TODO.txt">
       <Link>TODO.txt</Link>
     </None>
+    <None Include="..\README.md">
+      <Link>README.md</Link>
+    </None>
   </ItemGroup>
 </Project>

@@ -11,13 +11,14 @@ NOTE: This is very "beta". I've tried to squash all the major bugs, but please d
 Known bugs:
 * For some reason the first time you place a crossing, the road briefly flickers. Subsequent placements are fine, though.
 * The overlay (the blue/red circle showing where you can place crossings) can sometimes render a bit fuzzily around the edges. I've got an idea where to look to fix that one but it's not bad enough to delay the release over.
+* The crossing texture looks smeared right at the centre on 4 lane roads, but 2 and 6 lane roads are fine.
 
 Future enhancements:
+* Make the button icon look less like it was put together by a programmer with no art skills in 5 minutes.
 * Add tooltips for when a crossing can't be built
 * Stop street signs appearing at crossings
 * Highlight buildings which will be destroyed by crossing creation (which can sometimes happen on curved roads because the curvature changes slightly).
 
 Source code is available at https://github.com/bernardd/Crossings
 
-Thanks to everyone else who made their mods source code available for referencing and copying. And thanks to Colossal Order for giving us a fantastic game.
-
+Thanks to everyone else who made their mods' source code available for referencing and copying. And thanks to Colossal Order for giving us a fantastic game.

@@ -214,21 +214,20 @@ namespace Crossings
 		private IEnumerator CreateCrossing()
 		{
 			if (CanBuild (m_currentSegmentID, m_currentNodeID)) {
-				if (m_currentNodeID == 0) {
-					ushort newSegment, newNode;
-					int cost, productionRate;
-					ToolBase.ToolErrors errors = NetTool.CreateNode (m_prefab, m_controlPoint, m_controlPoint, m_controlPoint, NetTool.m_nodePositionsSimulation, 0, true, false, true, false, false, false, 0, out newNode, out newSegment, out cost, out productionRate);
-					Debug.Log ("CreateNode test result: " + errors + " " + newNode + " " + newSegment + " " + cost + " " + productionRate);
-					if (errors != ToolBase.ToolErrors.None)
-						yield return null;
-
+				ushort newSegment, newNode;
+				int cost, productionRate;
+				ToolBase.ToolErrors errors = NetTool.CreateNode (m_prefab, m_controlPoint, m_controlPoint, m_controlPoint, NetTool.m_nodePositionsSimulation, 0, true, false, true, false, false, false, 0, out newNode, out newSegment, out cost, out productionRate);
+				Debug.Log ("CreateNode test result: " + errors + " " + newNode + " " + newSegment + " " + cost + " " + productionRate);
+				if (errors != ToolBase.ToolErrors.None)
+					yield return null;
+				if (newNode == 0) {
 					NetTool.CreateNode (m_prefab, m_controlPoint, m_controlPoint, m_controlPoint, NetTool.m_nodePositionsSimulation, 0, false, false, true, false, false, false, 0, out newNode, out newSegment, out cost, out productionRate);
 					NetManager.instance.m_nodes.m_buffer [newNode].m_flags |= (NetNode.Flags)CrossingsNode.CrossingFlag;
 					Debug.Log ("CreateNode real result: " + errors + " " + newNode + " " + newSegment + " " + cost + " " + productionRate);
 				} else {
-					NetManager.instance.m_nodes.m_buffer [m_currentNodeID].m_flags |= (NetNode.Flags)CrossingsNode.CrossingFlag;
-					NetManager.instance.UpdateNode (m_currentNodeID, 0, 0);
-					Debug.Log ("Existing Node: " + m_currentNodeID + " " + NetManager.instance.m_nodes.m_buffer [m_currentNodeID].m_flags);
+					NetManager.instance.m_nodes.m_buffer [newNode].m_flags |= (NetNode.Flags)CrossingsNode.CrossingFlag;
+					NetManager.instance.UpdateNode (newNode, 0, 0);
+					Debug.Log ("Existing Node: " + newNode + " " + NetManager.instance.m_nodes.m_buffer [newNode].m_flags);
 				}
 			}
 
