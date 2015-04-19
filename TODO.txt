@@ -1,6 +1,5 @@
 ﻿TODO:
 * Fix up rendering on level 3 roads
-* Fix UI icon to fit in the circle
 * Minimse code copied from game where possible
 * Tooltips about build failures
 * Stop signposts appearing - it's not really a junction
@@ -9,6 +8,7 @@
 Known Bugs:
 * First placement causes road to flicker
 * Overlay renders messily sometimes
+* Shouldn't be able to place on bridges
 
 What works:
 * Baisic placement and fuctionality
