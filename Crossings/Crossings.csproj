@@ -20,8 +20,8 @@
     <ConsolePause>false</ConsolePause>
     <CustomCommands>
       <CustomCommands>
-        <Command type="BeforeBuild" command="cmd /c &quot;del &quot;%LOCALAPPDATA%\Colossal Order\Cities_Skylines\Addons\Mods\${SolutionName}\${SolutionName}.dll&quot;&quot;" workingdir="${ProjectDir}" externalConsole="True" />
-        <Command type="AfterBuild" command="xcopy /Y &quot;bin\${ProjectConfigName}\${SolutionName}.dll&quot; &quot;%LOCALAPPDATA%\Colossal Order\Cities_Skylines\Addons\Mods\${SolutionName}\&quot;&#xA;" workingdir="${ProjectDir}" externalConsole="True" />
+        <Command type="BeforeBuild" command="cmd /c &quot;del &quot;E:\Program Files (x86)\Steam\steamapps\workshop\content\255710\427258853\${SolutionName}.dll&quot;&quot;" workingdir="${ProjectDir}" externalConsole="True" />
+        <Command type="AfterBuild" command="xcopy /Y &quot;bin\${ProjectConfigName}\${SolutionName}.dll&quot; &quot;E:\Program Files (x86)\Steam\steamapps\workshop\content\255710\427258853\&quot;&#xA;" workingdir="${ProjectDir}" externalConsole="True" />
       </CustomCommands>
     </CustomCommands>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
