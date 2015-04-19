@@ -145,7 +145,7 @@ namespace Crossings {
 			tabs[0].pressedFgSprite = tabs[0].focusedFgSprite = "CrossingsIconPressed";
 
 			roadsOptionPanel.AttachUIComponent(tabstrip.gameObject);
-			tabstrip.relativePosition = new Vector3(169, 38);
+			tabstrip.relativePosition = new Vector3(130, 38);
 			tabstrip.width = 80;
 			tabstrip.selectedIndex = -1;
 			tabstrip.padding = new RectOffset(0, 1, 0, 0);
