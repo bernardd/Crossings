@@ -62,9 +62,6 @@ namespace Crossings {
 	public class ThreadingExtension : ThreadingExtensionBase {
 		public static ThreadingExtension Instance { get; private set; }
 
-		string[] twowayNames = { "Basic Road", "Large Road" };
-		string[] onewayNames = { "Oneway Road", "Large Oneway" };
-
 		NetTool netTool = null;
 		ToolMode toolMode = ToolMode.Off;
 
