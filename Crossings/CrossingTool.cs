@@ -250,14 +250,31 @@ namespace Crossings
 			if (segmentID == 0)
 				return false;
 			
-			NetInfo info = NetManager.instance.m_segments.m_buffer [m_currentSegmentID].Info;
+			NetSegment segment = NetManager.instance.m_segments.m_buffer [m_currentSegmentID];
+			NetInfo info = segment.Info;
 			ItemClass.Level level = info.m_class.m_level;
 			if (!(info.m_netAI is RoadBaseAI))
 				return false; // No crossings on non-roads
 			
 			if (level == ItemClass.Level.Level5 || level == ItemClass.Level.Level1)
 				return false; // No crossings on freeways or dirt roads
-				
+
+			if (level != ItemClass.Level.Level2) {
+				ushort[] nodes;
+				if (nodeID == 0)
+					nodes = new ushort[] { segment.m_startNode, segment.m_endNode };
+				else
+					nodes = new ushort[] { nodeID };
+
+				//Debug.Log ("Segment flags: " + segment.m_flags);
+				foreach (ushort n in nodes) {
+					NetNode node = NetManager.instance.m_nodes.m_buffer [n];
+					//Debug.Log ("Node Flags: " + node.m_flags);
+					if ((node.m_flags & NetNode.Flags.Middle) != NetNode.Flags.None) // Bridge
+						return false; // 4/6 lane bridges get their bridgework mucked up by crossings
+				}
+			}
+
 			if (nodeID == 0)
 				return true; // No node means we can create one
 
