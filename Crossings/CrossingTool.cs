@@ -187,7 +187,7 @@ namespace Crossings
 
 					ToolManager toolManager = Singleton<ToolManager>.instance;
 					toolManager.m_drawCallData.m_overlayCalls++;
-					Singleton<RenderManager>.instance.OverlayEffect.DrawCircle (cameraInfo, colour, m_controlPoint.m_position, m_prefab.m_halfWidth * 2f, -100000f, 1280f, false, false);
+					Singleton<RenderManager>.instance.OverlayEffect.DrawCircle (cameraInfo, colour, m_controlPoint.m_position, m_prefab.m_halfWidth * 2f, -1f, 1280f, false, false);
 				}
 			}
 		}
