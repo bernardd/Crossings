@@ -7,8 +7,6 @@
 
 Known Bugs:
 * First placement causes road to flicker
-* Overlay renders messily sometimes
-* Shouldn't be able to place on bridges
 
 What works:
 * Baisic placement and fuctionality
