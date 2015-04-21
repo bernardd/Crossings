@@ -270,7 +270,7 @@ namespace Crossings
 				foreach (ushort n in nodes) {
 					NetNode node = NetManager.instance.m_nodes.m_buffer [n];
 					//Debug.Log ("Node Flags: " + node.m_flags);
-					if ((node.m_flags & NetNode.Flags.Middle) != NetNode.Flags.None) // Bridge
+					if ((node.m_flags & NetNode.Flags.OnGround) == NetNode.Flags.None) // Bridge
 						return false; // 4/6 lane bridges get their bridgework mucked up by crossings
 				}
 			}
