@@ -1,11 +1,11 @@
 ﻿TODO:
-* Fix up rendering on level 3 roads
 * Minimse code copied from game where possible
 * Tooltips about build failures
 * Stop signposts appearing - it's not really a junction
 * Look at highlighting buildings that will be knocked down (can happen on curved roads)
 
 Known Bugs:
+* Rendering on level 3 roads
 * First placement causes road to flicker
 
 What works:
