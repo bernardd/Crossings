@@ -146,7 +146,7 @@ namespace Crossings {
 
 			roadsOptionPanel.AttachUIComponent(tabstrip.gameObject);
 			tabstrip.relativePosition = new Vector3(94, 38);
-			tabstrip.width = 80;
+			//tabstrip.width = 31;
 			tabstrip.selectedIndex = -1;
 			tabstrip.padding = new RectOffset(0, 1, 0, 0);
 
