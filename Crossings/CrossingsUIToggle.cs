@@ -93,7 +93,7 @@ namespace Crossings {
 			builtinTabstrip = UIUtils.Instance.FindComponent<UITabstrip>("ToolMode", roadsOptionPanel);
 			if (builtinTabstrip == null || !builtinTabstrip.gameObject.activeInHierarchy) return false;
 
-			tabstrip = UIUtils.Instance.FindComponent<UITabstrip>("ExtendedRoadUpgradePanel");
+			tabstrip = UIUtils.Instance.FindComponent<UITabstrip>("CrossingsPanel");
 			if (tabstrip != null) {
 				DestroyView();
 			}
