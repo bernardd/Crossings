@@ -17,22 +17,19 @@ namespace Crossings {
 		int originalBuiltinTabsripSelectedIndex = -1;
 		UIComponent roadsOptionPanel = null;
 		UITabstrip builtinTabstrip = null;
-		UITabstrip tabstrip = null;
+		UIButton button = null;
 
-		ToolMode _toolMode = ToolMode.Off;
+		bool _toolEnabled = false;
 
-		public ToolMode toolMode {
-			get { return _toolMode; }
+		public bool toolEnabled {
+			get { return _toolEnabled; }
 			set {
-				if (value == _toolMode) return;
+				if (value == _toolEnabled) return;
 
-				_toolMode = value;
-				if (tabstrip != null) {
-					tabstrip.selectedIndex = (int)_toolMode - 1;
-				}
+				_toolEnabled = value;
 
 				if (builtinTabstrip != null) {
-					if (_toolMode != ToolMode.Off) {
+					if (_toolEnabled) {
 						if (builtinTabstrip.selectedIndex >= 0) {
 							originalBuiltinTabsripSelectedIndex = builtinTabstrip.selectedIndex;
 						}
@@ -52,10 +49,10 @@ namespace Crossings {
 			}
 		}
 
-		public event System.Action<ToolMode> selectedToolModeChanged;
+		public event System.Action<bool> selectedToolModeChanged;
 
 		bool initialized {
-			get { return tabstrip != null; }
+			get { return button != null; }
 		}
 
 
@@ -64,26 +61,28 @@ namespace Crossings {
 				if (!Initialize()) return;
 			}
 
-			Debug.Log("Showing UI");
+			Debug.Log("[Crossings] Showing UI");
 			isVisible = true;
 		}
 
 		PropertyChangedEventHandler<int> builtinModeChangedHandler = null;
 
 		public void DestroyView() {
-			if (tabstrip != null) {
+			Debug.Log ("[Crossings] Destroying view");
+			if (button != null) {
 				if (builtinTabstrip != null) {
 					builtinTabstrip.eventSelectedIndexChanged -= builtinModeChangedHandler;
 				}
 
-				UIView.Destroy(tabstrip);
-				tabstrip = null;
+				UIView.Destroy(button);
+				button = null;
 			}
 			isVisible = false;
+			_toolEnabled = false;
 		}
 
 		bool Initialize() {
-			Debug.Log("Initializing UI");
+			Debug.Log("[Crossings] Initializing UI");
 
 			if (UIUtils.Instance == null) return false;
 
@@ -93,22 +92,19 @@ namespace Crossings {
 			builtinTabstrip = UIUtils.Instance.FindComponent<UITabstrip>("ToolMode", roadsOptionPanel);
 			if (builtinTabstrip == null || !builtinTabstrip.gameObject.activeInHierarchy) return false;
 
-			tabstrip = UIUtils.Instance.FindComponent<UITabstrip>("CrossingsPanel");
-			if (tabstrip != null) {
+			button = UIUtils.Instance.FindComponent<UIButton>("CrossingsButton");
+			if (button != null) {
 				DestroyView();
 			}
 
-			CreateView();
-			if (tabstrip == null) return false; 
+			CreateButton();
+			if (button == null) return false; 
 
 			return true;
 		}
 
-		void CreateView() {
-			Debug.Log("Creating view");
-
-			GameObject rootObject = new GameObject("CrossingsPanel");
-			tabstrip = rootObject.AddComponent<UITabstrip>();
+		void CreateButton() {
+			Debug.Log("[Crossings] Creating button");
 
 			UIButton tabTemplate = (UIButton)builtinTabstrip.tabs[0];
 
@@ -123,37 +119,30 @@ namespace Crossings {
 			};
 
 			UITextureAtlas atlas = CreateTextureAtlas("sprites.png", "CrossingsUI", tabTemplate.atlas.material, spriteWidth, spriteHeight, spriteNames);
+			button = roadsOptionPanel.AddUIComponent<UIButton> ();
 
-			List<UIButton> tabs = new List<UIButton>();
-			tabs.Add(tabstrip.AddTab("", null, false));
+			button.name = "CrossingsButton";
+			button.atlas = atlas;
+			button.size = new Vector2(spriteWidth, spriteHeight);
+			button.normalBgSprite = "CrossingsButtonBg";
+			button.disabledBgSprite = "CrossingsButtonBg";
+			button.hoveredBgSprite = "CrossingsButtonBgHovered";
+			button.pressedBgSprite = "CrossingsButtonBgPressed";
+			button.focusedBgSprite = "CrossingsButtonBgPressed";
+			button.playAudioEvents = true;
+			button.tooltip = "Build Crossing";
+			button.normalFgSprite = button.disabledFgSprite = button.hoveredFgSprite = "CrossingsIcon";
+			button.pressedFgSprite = button.focusedFgSprite = "CrossingsIconPressed";
 
-			foreach (UIButton tab in tabs) {
-				tab.name = "CrossingsButton";
-				tab.atlas = atlas;
-				tab.size = new Vector2(spriteWidth, spriteHeight);
-				tab.normalBgSprite = "CrossingsButtonBg";
-				tab.disabledBgSprite = "CrossingsUButtonBg";
-				tab.hoveredBgSprite = "CrossingsButtonBgHovered";
-				tab.pressedBgSprite = "CrossingsButtonBgPressed";
-				tab.focusedBgSprite = "CrossingsButtonBgPressed";
-				tab.playAudioEvents = true;
-			}
-
-			tabs[0].name = "CrossingsButton";
-			tabs[0].tooltip = "BuildCrossing";
-			tabs[0].normalFgSprite = tabs[0].disabledFgSprite = tabs[0].hoveredFgSprite = "CrossingsIcon";
-			tabs[0].pressedFgSprite = tabs[0].focusedFgSprite = "CrossingsIconPressed";
-
-			roadsOptionPanel.AttachUIComponent(tabstrip.gameObject);
-			tabstrip.relativePosition = new Vector3(94, 38);
-			tabstrip.width = 31;
-			tabstrip.selectedIndex = -1;
-			tabstrip.padding = new RectOffset(0, 1, 0, 0);
+			button.relativePosition = new Vector3(94, 38);
+			button.size = new Vector2 (spriteWidth, spriteHeight);
+	//		button.selectedIndex = -1;
+	//		button.padding = new RectOffset(0, 1, 0, 0);
 
 			if (builtinModeChangedHandler == null) {
 				builtinModeChangedHandler = (UIComponent component, int index) => {
 					if (!ignoreBuiltinTabstripEvents) {
-						if (selectedToolModeChanged != null) selectedToolModeChanged(ToolMode.Off);
+						if (selectedToolModeChanged != null) selectedToolModeChanged(false);
 					}
 				};
 			}
@@ -161,16 +150,15 @@ namespace Crossings {
 			builtinTabstrip.eventSelectedIndexChanged += builtinModeChangedHandler;
 
 			// Setting selectedIndex needs to be delayed for some reason
-			tabstrip.StartCoroutine(FinishCreatingView());
+			button.StartCoroutine(FinishCreatingView());
 		}
 
 		System.Collections.IEnumerator FinishCreatingView() {
 			yield return null;
-			tabstrip.selectedIndex = -1;
-			tabstrip.eventSelectedIndexChanged += (UIComponent component, int index) => {
-				ToolMode newMode = (ToolMode)(index + 1);
-				Debug.Log("tabstrip.eventSelectedIndexChanged: " + newMode);
-				if (selectedToolModeChanged != null) selectedToolModeChanged(newMode);
+			button.eventClick += (UIComponent component, UIMouseEventParameter param) => {
+				bool newEnabled = !_toolEnabled;
+				Debug.Log("button.eventClick: " + newEnabled);
+				if (selectedToolModeChanged != null) selectedToolModeChanged(newEnabled);
 			};
 		}
 

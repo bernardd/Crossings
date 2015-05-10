@@ -18,6 +18,11 @@ namespace Crossings {
 	 
 	public class Loader : LoadingExtensionBase {
 
+		public static CrossingsUI ui = new CrossingsUI();
+		public static bool loadingLevel = false;
+		public static CrossingTool buildTool = null;
+		public static NetTool netTool = null;
+
 		public override void OnCreated(ILoading loading)
 		{
 			Debug.Log ("OnCreated()");
@@ -25,25 +30,80 @@ namespace Crossings {
 
 			CrossingsNode.Hook ();
 
+			ui.selectedToolModeChanged += (bool enabled) => {
+				SetToolEnabled(enabled);
+			};
+
 			Debug.Log ("OnCreated() complete");
 		}
 
 		public override void OnReleased()
 		{
-			Debug.Log ("OnReleased()");
+			Debug.Log ("[Crossings] OnReleased()");
+			ui.DestroyView();
+			DestroyBuildTool();
+
 			base.OnReleased ();
-			Debug.Log ("OnReleased() complete");
 		}
 
 		public override void OnLevelLoaded (LoadMode mode)
 		{
 			base.OnLevelLoaded (mode);
-			Debug.Log ("Crossings loading...");
 
+			if (mode == LoadMode.NewGame || mode == LoadMode.LoadGame)
+				ui.DestroyView ();
+			loadingLevel = false;
 
-			Debug.Log("Crossings loaded");
+			Debug.Log("[Crossings] OnLevelLoaded, UI visible: " + ui.isVisible);
 		}
 
+		public override void OnLevelUnloading() {
+			Debug.Log ("[Crossings] Unloading level");
+			ui.DestroyView();
+			loadingLevel = true;
+		}
+			
+		public static void SetToolEnabled(bool enabled) {
+			if (enabled == ui.toolEnabled)
+				return;
+
+			if (enabled) {
+				Debug.Log ("[Crossings] Tool enabled");
+				if (buildTool == null)
+					CreateBuildTool ();
+
+				ToolsModifierControl.toolController.CurrentTool = buildTool;
+			}
+			else {
+				Debug.Log("[Crossings] Tool disabled");
+
+				if (ToolsModifierControl.toolController.CurrentTool == buildTool || ToolsModifierControl.toolController.CurrentTool == null) {
+					ToolsModifierControl.toolController.CurrentTool = netTool;
+				}
+
+				DestroyBuildTool();
+			}
+			ui.toolEnabled = enabled;
+		}
+
+		static void CreateBuildTool() {
+			buildTool = ToolsModifierControl.toolController.gameObject.GetComponent<CrossingTool>();
+			if (buildTool == null) {  
+				buildTool = ToolsModifierControl.toolController.gameObject.AddComponent<CrossingTool>();
+				Debug.Log("[Crossings] Tool created: " + buildTool);
+			}
+			else {
+				Debug.Log("[Crossings] Found existing tool: " + buildTool);
+			}
+		}
+
+		static void DestroyBuildTool() {
+			if (buildTool != null) {
+				Debug.Log("[Crossings] Tool destroyed");
+				CrossingTool.Destroy(buildTool);
+				buildTool = null;
+			}
+		}
 	}
 
 	public static class Util
@@ -60,97 +120,15 @@ namespace Crossings {
 	}
 
 	public class ThreadingExtension : ThreadingExtensionBase {
-		public static ThreadingExtension Instance { get; private set; }
-
-		NetTool netTool = null;
-		ToolMode toolMode = ToolMode.Off;
 
 		UIPanel roadsPanel = null; 
 
-		CrossingsUI ui = new CrossingsUI();
-		bool loadingLevel = false;
-
-		CrossingTool buildTool = null;
-
-		public void OnLevelUnloading() {
-			ui.DestroyView();
-			toolMode = ToolMode.Off;
-			loadingLevel = true;
-		}
-
-		public void OnLevelLoaded(LoadMode mode) {
-			loadingLevel = false;
-			Debug.Log("OnLevelLoaded, UI visible: " + ui.isVisible);
-		}
-
 		public override void OnCreated(IThreading threading) {
-			Instance = this;
-			ui.selectedToolModeChanged += (ToolMode newMode) => {
-				SetToolMode(newMode);
-			};
-		}
 
-		public override void OnReleased() {
-			ui.DestroyView();
-			DestroyBuildTool();
-		}
-
-		void CreateBuildTool() {
-			if (buildTool == null) {
-				buildTool = ToolsModifierControl.toolController.gameObject.GetComponent<CrossingTool>();
-				if (buildTool == null) {  
-					buildTool = ToolsModifierControl.toolController.gameObject.AddComponent<CrossingTool>();
-					Debug.Log("Tool created: " + buildTool);
-				}
-				else {
-					Debug.Log("Found existing tool: " + buildTool);
-				}
-			} 
-		}
-
-		void DestroyBuildTool() {
-			if (buildTool != null) {
-				Debug.Log("Tool destroyed");
-				CrossingTool.Destroy(buildTool);
-				buildTool = null;
-			}
-		}
-
-		void SetToolMode(ToolMode mode, bool resetNetToolModeToStraight = false) {
-			if (mode == toolMode) return;
-
-			if (mode != ToolMode.Off) {
-				CreateBuildTool();
-				ToolsModifierControl.toolController.CurrentTool = buildTool;
-
-				if (mode == ToolMode.On) {
-					Debug.Log("Crossing placement mode activated");
-					toolMode = ToolMode.On;
-				}
-		
-				ui.toolMode = toolMode;
-			}
-			else {
-				Debug.Log("Tool disabled");
-				toolMode = ToolMode.Off;
-
-				if (ToolsModifierControl.toolController.CurrentTool == buildTool || ToolsModifierControl.toolController.CurrentTool == null) {
-					ToolsModifierControl.toolController.CurrentTool = netTool;
-				}
-
-				DestroyBuildTool();
-
-				ui.toolMode = toolMode;
-
-				if (resetNetToolModeToStraight) {
-					netTool.m_mode = NetTool.Mode.Straight;
-					Debug.Log("Reseted netTool mode: " + netTool.m_mode);
-				}
-			}
 		}
 
 		public override void OnUpdate(float realTimeDelta, float simulationTimeDelta) {
-			if (loadingLevel)
+			if (Loader.loadingLevel)
 				return;
 
 			if (roadsPanel == null) {
@@ -158,43 +136,41 @@ namespace Crossings {
 			}
 
 			if (roadsPanel == null || !roadsPanel.isVisible) {
-				if (toolMode != ToolMode.Off) {
-					Debug.Log ("Roads panel no longer visible");
-					SetToolMode (ToolMode.Off, true);
+				if (Loader.ui.toolEnabled) {
+					Debug.Log ("[Crossings] Roads panel no longer visible");
+					Loader.SetToolEnabled (false);
 				}
 				return;
 			}
 
-			if (netTool == null) {
+			if (Loader.netTool == null) {
 				foreach (var tool in ToolsModifierControl.toolController.Tools) {
 					NetTool nt = tool as NetTool;
 					if (nt != null && nt.m_prefab != null) {
-						Debug.Log ("NetTool found: " + nt.name);
-						netTool = nt;
+						Debug.Log ("[Crossings] NetTool found: " + nt.name);
+						Loader.netTool = nt;
 						break;
 					}
 				}
 
-				if (netTool == null)
+				if (Loader.netTool == null)
 					return;
 
-				Debug.Log ("UI visible: " + ui.isVisible);
+				Debug.Log ("[Crossings] UI visible: " + Loader.ui.isVisible);
 			}
 
-			if (!ui.isVisible) {
-				ui.Show ();
+			if (!Loader.ui.isVisible) {
+				Loader.ui.Show ();
 			}
 
-			if (toolMode != ToolMode.Off) {
-				if (ToolsModifierControl.toolController.CurrentTool != buildTool) {
-					Debug.Log ("Another tool selected");
-					SetToolMode (ToolMode.Off);
+			if (Loader.ui.toolEnabled) {
+				if (ToolsModifierControl.toolController.CurrentTool != Loader.buildTool) {
+					Debug.Log ("[Crossings] Another tool selected");
+					Loader.SetToolEnabled (false);
 				}
 			} else {
-				ui.toolMode = ToolMode.Off;
-
-				if (ToolsModifierControl.toolController.CurrentTool == buildTool) {
-					ToolsModifierControl.toolController.CurrentTool = netTool;
+				if (ToolsModifierControl.toolController.CurrentTool == Loader.buildTool) {
+					ToolsModifierControl.toolController.CurrentTool = Loader.netTool;
 				}
 			}
 		}
