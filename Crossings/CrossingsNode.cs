@@ -266,8 +266,6 @@ namespace Crossings
 			RoadBaseAI thisAI = thisInfo.m_netAI as RoadBaseAI;
 
 			bool isCrossing = (data.m_flags & (NetNode.Flags)CrossingFlag) != NetNode.Flags.None;
-			if (isCrossing)
-				Debug.Log ("GOT A CROSSING NODE! " + nodeID);
 
 			// Luckily NetAI.UpdateNodeFlags() is a noop for now, so we don't have to fnangle a way to call this
 			// base.UpdateNodeFlags(nodeID, ref data);
