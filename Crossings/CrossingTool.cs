@@ -128,9 +128,9 @@ namespace Crossings
 			Building.Flags ignoreBuildingFlags = Building.Flags.All;
 
 			if (m_prefab != null) {
-				if (this.m_mouseRayValid && NetTool.MakeControlPoint (this.m_mouseRay, this.m_mouseRayLength, m_prefab, false, ignoreNodeFlags, ignoreSegmentFlags, ignoreBuildingFlags, 0, out controlPoint)) {
+				if (this.m_mouseRayValid && NetTool.MakeControlPoint (this.m_mouseRay, this.m_mouseRayLength, m_prefab, false, ignoreNodeFlags, ignoreSegmentFlags, ignoreBuildingFlags, 0, false, out controlPoint)) {
 					if (controlPoint.m_node == 0 && controlPoint.m_segment == 0 && !controlPoint.m_outside) {
-						controlPoint.m_position.y = NetSegment.SampleTerrainHeight (m_prefab, controlPoint.m_position, false) + controlPoint.m_elevation;
+						controlPoint.m_position.y = NetSegment.SampleTerrainHeight (m_prefab, controlPoint.m_position, false, 0) + controlPoint.m_elevation;
 					}
 				} else {
 					failed = true;
