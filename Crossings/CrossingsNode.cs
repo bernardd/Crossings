@@ -468,7 +468,7 @@ namespace Crossings
 					data.m_dataVector1.w = 0.01f;
 
 				data.m_dataVector2 = new Vector4(num6, y, num8, w);
-				data.m_extraData.m_dataVector4 = RenderManager.GetColorLocation(65536u + (uint)nodeID);
+				data.m_extraData.m_dataVector4 = RenderManager.GetColorLocation(86016u + (uint)nodeID);
 			}
 			else
 			{
@@ -497,9 +497,14 @@ namespace Crossings
 				data.m_dataMatrix1.SetRow(3, data.m_dataMatrix1.GetRow(3) + new Vector4(0.2f, 0.2f, 0.2f, 0.2f));
 				data.m_dataVector0 = new Vector4(0.5f / info.m_halfWidth, 1f / info.m_segmentLength, 0.5f - info.m_pavementWidth / info.m_halfWidth * 0.5f, info.m_pavementWidth / info.m_halfWidth * 0.5f);
 				data.m_dataVector1 = centerPos - data.m_position;
-				data.m_dataVector1.w = (data.m_dataMatrix0.m33 + data.m_extraData.m_dataMatrix2.m33 + data.m_extraData.m_dataMatrix3.m33 + data.m_dataMatrix1.m33) * 0.25f;
+
+				if ((thisNode.m_flags & (NetNode.Flags)CrossingFlag) == NetNode.Flags.None)
+					data.m_dataVector1.w = (data.m_dataMatrix0.m33 + data.m_extraData.m_dataMatrix2.m33 + data.m_extraData.m_dataMatrix3.m33 + data.m_dataMatrix1.m33) * 0.25f;
+				else
+					data.m_dataVector1.w = 0.01f;
+				
 				data.m_dataVector2 = new Vector4(info.m_pavementWidth / info.m_halfWidth * 0.5f, 1f, info.m_pavementWidth / info.m_halfWidth * 0.5f, 1f);
-				data.m_extraData.m_dataVector4 = RenderManager.GetColorLocation(65536u + (uint)nodeID);
+				data.m_extraData.m_dataVector4 = RenderManager.GetColorLocation(86016u + (uint)nodeID);
 			}
 			data.m_dataInt0 = segmentIndex;
 			data.m_dataColor0 = info.m_color;
