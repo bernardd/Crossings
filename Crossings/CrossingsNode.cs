@@ -8,7 +8,7 @@ namespace Crossings
 {
 	public class CrossingsNode
 	{
-		public static int CrossingFlag = (int)NetNode.Flags.OneWayIn << 1; // Largest item in the enum moved one bit
+		public static int CrossingFlag = (int)NetNode.Flags.Electricity << 1; // Largest item in the enum moved one bit
 		static bool hooked = false;
 		static private Dictionary<MethodInfo, RedirectCallsState> redirects = new Dictionary<MethodInfo, RedirectCallsState>();
 
@@ -70,6 +70,8 @@ namespace Crossings
 			bool notRamp = true;
 			bool flag9 = Singleton<TerrainManager>.instance.HasDetailMapping(thisNode.m_position);
 			NetInfo with = null;
+			bool flag10 = false;
+			bool flag11 = false;
 			NetInfo netInfo = null;
 			float num3 = -1E+07f;
 			for (int i = 0; i < 8; i++)
@@ -94,6 +96,10 @@ namespace Crossings
 			{
 				thisNode.Info = netInfo;
 				Singleton<NetManager>.instance.UpdateNodeColors(nodeID);
+				if (!netInfo.m_canDisable)
+				{
+					thisNode.m_flags &= ~NetNode.Flags.Disabled;
+				}
 			}
 			bool startNodeIsFirst = false;
 
@@ -112,6 +118,17 @@ namespace Crossings
 					Vector3 dirFromNode = (!isStartNode) ? endDirection : startDirection;
 					NetInfo info2 = instance.m_segments.m_buffer[(int)segment2].Info;
 					ItemClass connectionClass = info2.GetConnectionClass();
+					bool flag14;
+					bool flag15;
+					if (isStartNode == ((instance.m_segments.m_buffer[(int)segment2].m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None))
+					{
+						flag14 = info2.m_hasBackwardVehicleLanes;
+						flag15 = info2.m_hasForwardVehicleLanes;
+					}
+					else {
+						flag14 = info2.m_hasForwardVehicleLanes;
+						flag15 = info2.m_hasBackwardVehicleLanes;
+					}
 
 					// For each segment after the one we're looking at
 					for (int k = j + 1; k < 8; k++)
@@ -131,7 +148,10 @@ namespace Crossings
 								float num5 = 0.01f - Mathf.Min(info2.m_maxTurnAngleCos, info3.m_maxTurnAngleCos);
 								if (num4 < num5)
 								{
-									connections++;
+									if ((info2.m_requireDirectRenderers && (info2.m_nodeConnectGroups == NetInfo.ConnectGroup.None || (info2.m_nodeConnectGroups & info3.m_connectGroup) != NetInfo.ConnectGroup.None)) || (info3.m_requireDirectRenderers && (info3.m_nodeConnectGroups == NetInfo.ConnectGroup.None || (info3.m_nodeConnectGroups & info2.m_connectGroup) != NetInfo.ConnectGroup.None)))
+									{
+										connections++;
+									}
 								}
 								else
 								{
@@ -172,7 +192,7 @@ namespace Crossings
 						vector = dirFromNode;
 						hasSegments = true;
 					}
-					else if (segmentCount == 2 && info2.IsCombatible(with) && info2.IsCombatible(netInfo))
+					else if (segmentCount == 2 && info2.IsCombatible(with) && info2.IsCombatible(netInfo) && flag14 == flag11 && flag15 == flag10)
 					{
 						float num6 = vector.x * dirFromNode.x + vector.z * dirFromNode.z;
 						if (num6 < -0.999f)
@@ -190,6 +210,8 @@ namespace Crossings
 						makeJunction = true;
 					}
 					with = info2;
+					flag10 = flag14;
+					flag11 = flag15;
 				}
 			}
 			if (!netInfo.m_enableMiddleNodes & makeMiddle)
@@ -269,6 +291,7 @@ namespace Crossings
 
 			// Luckily NetAI.UpdateNodeFlags() is a noop for now, so we don't have to fnangle a way to call this
 			// base.UpdateNodeFlags(nodeID, ref data);
+			// [VN, 02/18/2016] But we could also move this method into a new class that inherits from RoadBaseAI.
 
 			NetNode.Flags flags = data.m_flags;
 			uint levelsSeen = 0u;
@@ -278,6 +301,7 @@ namespace Crossings
 			int incomingLanes = 0;
 			int attachedSegmentsWithLanes = 0;
 			bool wantTrafficLights = thisAI.WantTrafficLights();
+			bool flag2 = false;
 			// For each segment
 			for (int i = 0; i < 8; i++)
 			{
@@ -285,39 +309,46 @@ namespace Crossings
 				if (segment != 0)
 				{
 					NetInfo info = instance.m_segments.m_buffer[(int)segment].Info;
-					uint levelBit = 1u << (int)info.m_class.m_level;
-					if ((levelsSeen & levelBit) == 0u)
+					if (info != null)
 					{
-						levelsSeen |= levelBit;
-						levelsSeenCount++;
-					}
-					if (info.m_netAI.WantTrafficLights())
-					{
-						wantTrafficLights = true;
-					}
-					int forwardLanes = 0;
-					int backLanes = 0;
-					instance.m_segments.m_buffer[(int)segment].CountLanes(segment, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Car, ref forwardLanes, ref backLanes);
-					if (instance.m_segments.m_buffer[(int)segment].m_endNode == nodeID)
-					{
-						if (forwardLanes != 0)
+						uint levelBit = 1u << (int)info.m_class.m_level;
+						if ((levelsSeen & levelBit) == 0u)
+						{
+							levelsSeen |= levelBit;
+							levelsSeenCount++;
+						}
+						if (info.m_netAI.WantTrafficLights())
+						{
+							wantTrafficLights = true;
+						}
+						if ((info.m_vehicleTypes & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None != ((thisInfo.m_vehicleTypes & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None))
+						{
+							flag2 = true;
+						}
+						int forwardLanes = 0;
+						int backLanes = 0;
+						instance.m_segments.m_buffer[(int)segment].CountLanes(segment, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Tram, ref forwardLanes, ref backLanes);
+						if (instance.m_segments.m_buffer[(int)segment].m_endNode == nodeID)
+						{
+							if (forwardLanes != 0)
+							{
+								incomingSegments++;
+								incomingLanes += forwardLanes;
+							}
+						}
+						else if (backLanes != 0)
 						{
 							incomingSegments++;
-							incomingLanes += forwardLanes;
+							incomingLanes += backLanes;
 						}
-					}
-					else if (backLanes != 0)
-					{
-						incomingSegments++;
-						incomingLanes += backLanes;
-					}
-					if (forwardLanes != 0 || backLanes != 0)
-					{
-						attachedSegmentsWithLanes++;
+						if (forwardLanes != 0 || backLanes != 0)
+						{
+							attachedSegmentsWithLanes++;
+						}
 					}
 				}
 			}
-			if (levelsSeenCount >= 2)
+			if (levelsSeenCount >= 2 || flag2)
 			{
 				flags |= NetNode.Flags.Transition;
 			}
@@ -345,7 +376,6 @@ namespace Crossings
 			data.m_position = thisNode.m_position;
 			data.m_rotation = Quaternion.identity;
 			data.m_initialized = true;
-			float vScale = 0.05f;
 			Vector3 zero = Vector3.zero;
 			Vector3 zero2 = Vector3.zero;
 			Vector3 zero3 = Vector3.zero;
@@ -360,6 +390,7 @@ namespace Crossings
 			Vector3 zero8 = Vector3.zero;
 			NetSegment netSegment = instance.m_segments.m_buffer[(int)nodeSegment];
 			NetInfo info = netSegment.Info;
+			float vScale = info.m_netAI.GetVScale();
 			ItemClass connectionClass = info.GetConnectionClass();
 			Vector3 vector3 = (nodeID != netSegment.m_startNode) ? netSegment.m_endDirection : netSegment.m_startDirection;
 			float num = -4f;
@@ -468,7 +499,6 @@ namespace Crossings
 					data.m_dataVector1.w = 0.01f;
 
 				data.m_dataVector2 = new Vector4(num6, y, num8, w);
-				data.m_extraData.m_dataVector4 = RenderManager.GetColorLocation(86016u + (uint)nodeID);
 			}
 			else
 			{
@@ -504,11 +534,23 @@ namespace Crossings
 					data.m_dataVector1.w = 0.01f;
 				
 				data.m_dataVector2 = new Vector4(info.m_pavementWidth / info.m_halfWidth * 0.5f, 1f, info.m_pavementWidth / info.m_halfWidth * 0.5f, 1f);
-				data.m_extraData.m_dataVector4 = RenderManager.GetColorLocation(86016u + (uint)nodeID);
 			}
+			Vector4 colorLocation;
+			Vector4 vector21;
+			if (NetNode.BlendJunction(nodeID) || (thisNode.m_flags & (NetNode.Flags)CrossingFlag) == NetNode.Flags.None)
+			{
+				colorLocation = RenderManager.GetColorLocation(86016u + (uint)nodeID);
+				vector21 = colorLocation;
+			}
+			else {
+				colorLocation = RenderManager.GetColorLocation((uint)(49152 + nodeSegment));
+				vector21 = RenderManager.GetColorLocation(86016u + (uint)nodeID);
+			}
+			data.m_extraData.m_dataVector4 = new Vector4(colorLocation.x, colorLocation.y, vector21.x, vector21.y);
 			data.m_dataInt0 = segmentIndex;
 			data.m_dataColor0 = info.m_color;
 			data.m_dataColor0.a = 0f;
+			data.m_dataFloat0 = Singleton<WeatherManager>.instance.GetWindSpeed(data.m_position);
 			if (info.m_requireSurfaceMaps)
 			{
 				Singleton<TerrainManager>.instance.GetSurfaceMapping(data.m_position, out data.m_dataTexture0, out data.m_dataTexture1, out data.m_dataVector3);
