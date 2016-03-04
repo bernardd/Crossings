@@ -48,19 +48,18 @@ namespace Crossings
 			}
 		}
 
-		protected override void OnToolGUI()
+		protected override void OnToolGUI(Event e)
 		{
 			bool isInsideUI = this.m_toolController.IsInsideUI;
-			Event current = Event.current;
-			if (current.type == EventType.MouseDown && !isInsideUI)
+			if (e.type == EventType.MouseDown && !isInsideUI)
 			{
-				if (current.button == 0) { // LMB
+				if (e.button == 0) { // LMB
 					if (this.m_cachedErrors == ToolBase.ToolErrors.None && m_currentSegmentID != 0) {
 						SimulationManager.instance.AddAction(this.CreateCrossing());
 					} else {
 						//	Singleton<SimulationManager>.instance.AddAction(this.CreateFailed());
 					}
-				} else if (current.button == 1) { // RMB
+				} else if (e.button == 1) { // RMB
 					if (this.m_cachedErrors == ToolBase.ToolErrors.None && m_currentSegmentID != 0) {
 						Debug.Log("[Crossings] Trying to remove crossing " + m_currentNodeID);	
 						SimulationManager.instance.AddAction(this.RemoveCrossing());
