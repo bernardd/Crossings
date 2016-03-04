@@ -44,7 +44,9 @@ namespace Crossings
 		// NetNode override
 		public void CalculateNode(ushort nodeID)
 		{
+			// MODIFICATION //
 			NetNode thisNode = NetManager.instance.m_nodes.m_buffer [nodeID];
+			// END MODIFICATON //
 
 			if (thisNode.m_flags == NetNode.Flags.None)
 			{
@@ -242,10 +244,12 @@ namespace Crossings
 			}
 			else if (makeJunction)
 			{
+				// MODIFICATION //
 				thisNode.m_flags = (flags | NetNode.Flags.Junction) & ~(NetNode.Flags)CrossingFlag;
 			}
 			else if (makeCrossing) {
 				thisNode.m_flags = flags | NetNode.Flags.Junction;
+				// END MODIFICATION //
 			}
 			else if (makeBend)
 			{
@@ -283,6 +287,7 @@ namespace Crossings
 		// RoadBaseAI override
 		public void UpdateNodeFlags(ushort nodeID, ref NetNode data)
 		{
+			// MODIFICATION //
 			NetInfo thisInfo = PrefabCollection<NetInfo>.GetPrefab(data.m_infoIndex);
 
 			RoadBaseAI thisAI = thisInfo.m_netAI as RoadBaseAI;
@@ -292,6 +297,7 @@ namespace Crossings
 			// Luckily NetAI.UpdateNodeFlags() is a noop for now, so we don't have to fnangle a way to call this
 			// base.UpdateNodeFlags(nodeID, ref data);
 			// [VN, 02/18/2016] But we could also move this method into a new class that inherits from RoadBaseAI.
+			// END MODIFICATON //
 
 			NetNode.Flags flags = data.m_flags;
 			uint levelsSeen = 0u;
@@ -356,8 +362,10 @@ namespace Crossings
 			{
 				flags &= ~NetNode.Flags.Transition;
 			}
+			// MODIFICATON //
 			// Logic for traffic light setting
 			if (wantTrafficLights && (isCrossing || incomingSegments > 2 || (incomingSegments >= 2 && attachedSegmentsWithLanes >= 3 && incomingLanes > 6)) && (flags & NetNode.Flags.Junction) != NetNode.Flags.None)
+			// END MODIFICATION //
 			{
 				flags |= NetNode.Flags.TrafficLights;
 			}
@@ -493,10 +501,13 @@ namespace Crossings
 				data.m_dataVector0 = new Vector4(0.5f / info.m_halfWidth, 1f / info.m_segmentLength, 0.5f - info.m_pavementWidth / info.m_halfWidth * 0.5f, info.m_pavementWidth / info.m_halfWidth * 0.5f);
 				data.m_dataVector1 = centerPos - data.m_position;
 
+				// **** MODIFICATION **** //
 				if ((thisNode.m_flags & (NetNode.Flags)CrossingFlag) == NetNode.Flags.None)
+					// Original code
 					data.m_dataVector1.w = (data.m_dataMatrix0.m33 + data.m_extraData.m_dataMatrix2.m33 + data.m_extraData.m_dataMatrix3.m33 + data.m_dataMatrix1.m33) * 0.25f;
 				else
 					data.m_dataVector1.w = 0.01f;
+				// **** END MODIFICATION **** //
 
 				data.m_dataVector2 = new Vector4(num6, y, num8, w);
 			}
@@ -528,10 +539,13 @@ namespace Crossings
 				data.m_dataVector0 = new Vector4(0.5f / info.m_halfWidth, 1f / info.m_segmentLength, 0.5f - info.m_pavementWidth / info.m_halfWidth * 0.5f, info.m_pavementWidth / info.m_halfWidth * 0.5f);
 				data.m_dataVector1 = centerPos - data.m_position;
 
+				// **** MODIFICATION **** //
 				if ((thisNode.m_flags & (NetNode.Flags)CrossingFlag) == NetNode.Flags.None)
+					// Original code
 					data.m_dataVector1.w = (data.m_dataMatrix0.m33 + data.m_extraData.m_dataMatrix2.m33 + data.m_extraData.m_dataMatrix3.m33 + data.m_dataMatrix1.m33) * 0.25f;
 				else
 					data.m_dataVector1.w = 0.01f;
+				// **** END MODIFICATION **** //
 				
 				data.m_dataVector2 = new Vector4(info.m_pavementWidth / info.m_halfWidth * 0.5f, 1f, info.m_pavementWidth / info.m_halfWidth * 0.5f, 1f);
 			}
