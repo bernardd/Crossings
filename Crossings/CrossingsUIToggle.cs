@@ -13,8 +13,6 @@ namespace Crossings {
 	public class CrossingsUI {
 		public bool isVisible { get; private set; }
 			
-		bool ignoreBuiltinTabstripEvents = false;
-		int originalBuiltinTabsripSelectedIndex = -1;
 		UIComponent roadsOptionPanel = null;
 		UITabstrip builtinTabstrip = null;
 		UIButton button = null;
@@ -30,21 +28,9 @@ namespace Crossings {
 				if (builtinTabstrip != null) {
 					Debug.Log ("[Crossings] builtinTabstrip.selectedIndex: " + builtinTabstrip.selectedIndex);
 					if (_toolEnabled) {
-						if (builtinTabstrip.selectedIndex >= 0) {
-							originalBuiltinTabsripSelectedIndex = builtinTabstrip.selectedIndex;
-						}
 
-						ignoreBuiltinTabstripEvents = true;
 						Debug.Log("[Crossings] Setting builtin tabstrip mode: " + (-1));
 					//	builtinTabstrip.selectedIndex = -1;
-						ignoreBuiltinTabstripEvents = false;
-					}
-					else if (builtinTabstrip.selectedIndex < 0 && originalBuiltinTabsripSelectedIndex >= 0) {
-						ignoreBuiltinTabstripEvents = true;
-						Debug.Log("[Crossings] Setting builtin tabstrip mode: " + originalBuiltinTabsripSelectedIndex);
-						if (originalBuiltinTabsripSelectedIndex != -1)
-							builtinTabstrip.selectedIndex = originalBuiltinTabsripSelectedIndex;
-						ignoreBuiltinTabstripEvents = false;
 					}
 				}
 			}
@@ -101,6 +87,7 @@ namespace Crossings {
 			}
 
 			CreateButton();
+
 			if (button == null) return false; 
 
 			return true;
@@ -144,26 +131,19 @@ namespace Crossings {
 
 			if (builtinModeChangedHandler == null) {
 				builtinModeChangedHandler = (UIComponent component, int index) => {
-					if (!ignoreBuiltinTabstripEvents) {
-						if (selectedToolModeChanged != null) selectedToolModeChanged(false);
-					}
+					button.state = UIButton.ButtonState.Normal;
+					if (selectedToolModeChanged != null) selectedToolModeChanged(false);
 				};
 			}
 
 			builtinTabstrip.eventSelectedIndexChanged += builtinModeChangedHandler;
 
-			// Setting selectedIndex needs to be delayed for some reason
-			button.StartCoroutine(FinishCreatingView());
-		}
-
-		System.Collections.IEnumerator FinishCreatingView() {
-			yield return null;
 			button.eventClick += (UIComponent component, UIMouseEventParameter param) => {
-				bool newEnabled = !_toolEnabled;
-				Debug.Log("button.eventClick: " + newEnabled);
-				if (selectedToolModeChanged != null) selectedToolModeChanged(newEnabled);
+				Debug.Log("button.eventClick");
+				if (selectedToolModeChanged != null) selectedToolModeChanged(true);
 			};
 		}
+
 
 		UITextureAtlas CreateTextureAtlas(string textureFile, string atlasName, Material baseMaterial, int spriteWidth, int spriteHeight, string[] spriteNames) {
 
