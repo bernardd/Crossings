@@ -22,12 +22,10 @@ namespace Crossings {
 		UIView uiRoot = null;
 
 		void FindUIRoot() {
-			Debug.Log("Finding UIRoot");
 			uiRoot = null;
 
 			foreach (UIView view in UIView.FindObjectsOfType<UIView>()) {
 				if (view.transform.parent == null && view.name == "UIView") {
-					Debug.Log("Found UIRoot");
 					uiRoot = view;
 					break;
 				}
@@ -45,15 +43,18 @@ namespace Crossings {
 		}
 
 		public T FindComponent<T>(string name, UIComponent parent = null, FindOptions options = FindOptions.None) where T : UIComponent {
+			Debug.Log ("Finding name " + name);
+
 			if (uiRoot == null) {
 				FindUIRoot();
 				if (uiRoot == null) {
-					Debug.Log("UIRoot not found");
+					Debug.Log("[Crossings] UIRoot not found");
 					return null;
 				}
 			}
 
 			foreach (T component in UIComponent.FindObjectsOfType<T>()) {
+
 				bool nameMatches;
 				if ((options & FindOptions.NameContains) != 0) nameMatches = component.name.Contains(name);
 				else nameMatches = component.name == name;
@@ -71,10 +72,11 @@ namespace Crossings {
 
 				if (t == null) continue;
 
+				Debug.Log ("[Crossings] Found with name " + component.name);
 				return component;
 			}
 
-			Debug.Log(typeof(T) + " not found: " + name);
+			Debug.Log("[Crossings] " + typeof(T) + " not found: " + name);
 
 			return null;
 		}

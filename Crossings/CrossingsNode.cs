@@ -25,15 +25,23 @@ namespace Crossings
 			var allFlags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
 			var methods = typeof(NetNode).GetMethods (allFlags); //.Single(c => c.Name == "RenderInstance" && c.GetParameters().Length == 3); // No idea why this doesn't work. Do it the old fashioned way:
 			foreach (MethodInfo m in methods) {
-				if (m.Name == "RefreshJunctionData" && m.GetParameters().Length == 6) {
+				if (m.Name == "RefreshJunctionData" && m.GetParameters ().Length == 6)
+				{
+					Debug.Log ("[Crossings] Hooking RefreshJunctionData");
 					redirects.Add (m, RedirectionHelper.RedirectCalls (m, typeof(CrossingsNode).GetMethod ("RefreshJunctionData", allFlags)));
-					break;
 				}
+				else
+				{
+					Debug.Log ("[Crossings] Not hooking: " + m.Name + "/" + m.GetParameters().Length);
+				}
+						
 			}
 
+			Debug.Log ("[Crossings] Hooking UpdateNodeFlags");
 			MethodInfo method = typeof(RoadBaseAI).GetMethod("UpdateNodeFlags", allFlags);
 			redirects.Add (method, RedirectionHelper.RedirectCalls (method, typeof(CrossingsNode).GetMethod ("UpdateNodeFlags", allFlags)));
 
+			Debug.Log ("[Crossings] Hooking CalculateNode");
 			method = typeof(NetNode).GetMethod("CalculateNode", allFlags);
 			redirects.Add (method, RedirectionHelper.RedirectCalls (method, typeof(CrossingsNode).GetMethod ("CalculateNode", allFlags)));
 
@@ -44,6 +52,7 @@ namespace Crossings
 		// NetNode override
 		public void CalculateNode(ushort nodeID)
 		{
+			Debug.Log ("[Crossings] CalculateNode");
 			// MODIFICATION //
 			NetNode thisNode = NetManager.instance.m_nodes.m_buffer [nodeID];
 			// END MODIFICATON //
@@ -53,23 +62,25 @@ namespace Crossings
 				return;
 			}
 
+			// MODIFICATION //
 			bool isCrossing = (thisNode.m_flags & (NetNode.Flags)CrossingFlag) != NetNode.Flags.None;
 			if (isCrossing)
-				Debug.Log ("GOT A CROSSING NODE! " + nodeID);
+				Debug.Log ("[Crossings] GOT A CROSSING NODE! " + nodeID);
+			// END MODIFICATON //
 			
 			NetManager instance = Singleton<NetManager>.instance;
 			Vector3 vector = Vector3.zero;
-			int segmentCount = 0;
-			int connections = 0;
-			bool hasSegments = false;
-			bool makeMiddle = false;
-			bool makeBend = false;
-			bool makeJunction = false;
-			bool makeCrossing = false;
-			bool isBend = false;
-			bool isStraight = false;
+			int segmentCount = 0; // num
+			int connections = 0; // num2
+			bool hasSegments = false; // flag1
+			bool makeMiddle = false; // flag2
+			bool makeBend = false; // flag4
+			bool makeJunction = false; // flag4
+			bool makeCrossing = false; // MODIFICATION
+			bool isBend = false;  // flag5
+			bool isStraight = false; // flag6
 			bool flag7 = false;
-			bool notRamp = true;
+			bool notRamp = true; // flag8
 			bool flag9 = Singleton<TerrainManager>.instance.HasDetailMapping(thisNode.m_position);
 			NetInfo with = null;
 			bool flag10 = false;
@@ -103,7 +114,7 @@ namespace Crossings
 					thisNode.m_flags &= ~NetNode.Flags.Disabled;
 				}
 			}
-			bool startNodeIsFirst = false;
+			bool startNodeIsFirst = false; // flag12
 
 			// For each attached segment
 			for (int j = 0; j < 8; j++)
@@ -144,8 +155,8 @@ namespace Crossings
 							// If both segments are the same type
 							if (connectionClass2.m_service == connectionClass.m_service)
 							{
-								bool isKStartNode = nodeID == instance.m_segments.m_buffer[(int)segment3].m_startNode;
-								Vector3 dirKFromNode = (!isKStartNode) ? instance.m_segments.m_buffer[(int)segment3].m_endDirection : instance.m_segments.m_buffer[(int)segment3].m_startDirection;
+								bool isKStartNode = nodeID == instance.m_segments.m_buffer[(int)segment3].m_startNode; // flag16
+								Vector3 dirKFromNode = (!isKStartNode) ? instance.m_segments.m_buffer[(int)segment3].m_endDirection : instance.m_segments.m_buffer[(int)segment3].m_startDirection; // vector3
 								float num4 = dirFromNode.x * dirKFromNode.x + dirFromNode.z * dirKFromNode.z;
 								float num5 = 0.01f - Mathf.Min(info2.m_maxTurnAngleCos, info3.m_maxTurnAngleCos);
 								if (num4 < num5)
@@ -232,10 +243,12 @@ namespace Crossings
 			{
 				makeJunction = true;
 			}
+			// MODIFICATION //
 			if (isCrossing)
 			{
 				makeCrossing = true;
 			}
+			// END MODIFICATION //
 				
 			NetNode.Flags flags = thisNode.m_flags & ~(NetNode.Flags.End | NetNode.Flags.Middle | NetNode.Flags.Bend | NetNode.Flags.Junction | NetNode.Flags.Moveable);
 			if ((flags & NetNode.Flags.Outside) != NetNode.Flags.None)
@@ -249,11 +262,11 @@ namespace Crossings
 			}
 			else if (makeCrossing) {
 				thisNode.m_flags = flags | NetNode.Flags.Junction;
-				// END MODIFICATION //
 			}
 			else if (makeBend)
 			{
 				thisNode.m_flags = (flags | NetNode.Flags.Bend) & ~(NetNode.Flags)CrossingFlag;
+				// END MODIFICATION //
 			}
 			else if (makeMiddle)
 			{
@@ -287,6 +300,7 @@ namespace Crossings
 		// RoadBaseAI override
 		public void UpdateNodeFlags(ushort nodeID, ref NetNode data)
 		{
+			Debug.Log ("[Crossings] UpdateNodeFlags");
 			// MODIFICATION //
 			NetInfo thisInfo = PrefabCollection<NetInfo>.GetPrefab(data.m_infoIndex);
 
@@ -300,14 +314,17 @@ namespace Crossings
 			// END MODIFICATON //
 
 			NetNode.Flags flags = data.m_flags;
-			uint levelsSeen = 0u;
-			int levelsSeenCount = 0;
+			uint levelsSeen = 0u; // num
+			int levelsSeenCount = 0; // num2
 			NetManager instance = Singleton<NetManager>.instance;
-			int incomingSegments = 0;
-			int incomingLanes = 0;
-			int attachedSegmentsWithLanes = 0;
-			bool wantTrafficLights = thisAI.WantTrafficLights();
+			int incomingSegments = 0; // num3
+			int incomingLanes = 0; // num4
+			int attachedSegmentsWithLanes = 0; // num5
+			bool wantTrafficLights = thisAI.WantTrafficLights(); // flag
 			bool flag2 = false;
+			int roadLinks = 0; // num6
+			int trainLinks = 0; // num7
+
 			// For each segment
 			for (int i = 0; i < 8; i++)
 			{
@@ -317,7 +334,7 @@ namespace Crossings
 					NetInfo info = instance.m_segments.m_buffer[(int)segment].Info;
 					if (info != null)
 					{
-						uint levelBit = 1u << (int)info.m_class.m_level;
+						uint levelBit = 1u << (int)info.m_class.m_level; // num8
 						if ((levelsSeen & levelBit) == 0u)
 						{
 							levelsSeen |= levelBit;
@@ -331,8 +348,8 @@ namespace Crossings
 						{
 							flag2 = true;
 						}
-						int forwardLanes = 0;
-						int backLanes = 0;
+						int forwardLanes = 0; // num9
+						int backLanes = 0; // num10
 						instance.m_segments.m_buffer[(int)segment].CountLanes(segment, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Tram, ref forwardLanes, ref backLanes);
 						if (instance.m_segments.m_buffer[(int)segment].m_endNode == nodeID)
 						{
@@ -351,27 +368,42 @@ namespace Crossings
 						{
 							attachedSegmentsWithLanes++;
 						}
+						if (info.m_class.m_service == ItemClass.Service.Road)
+						{
+							roadLinks++;
+						}
+						else if (info.m_class.m_service == ItemClass.Service.PublicTransport)
+						{
+							trainLinks++;
+						}
 					}
 				}
 			}
-			if (levelsSeenCount >= 2 || flag2)
+			if (roadLinks >= 2 && trainLinks >= 2)
 			{
-				flags |= NetNode.Flags.Transition;
+				flags |= (NetNode.Flags.LevelCrossing | NetNode.Flags.TrafficLights);
 			}
 			else
 			{
-				flags &= ~NetNode.Flags.Transition;
-			}
-			// MODIFICATON //
-			// Logic for traffic light setting
-			if (wantTrafficLights && (isCrossing || incomingSegments > 2 || (incomingSegments >= 2 && attachedSegmentsWithLanes >= 3 && incomingLanes > 6)) && (flags & NetNode.Flags.Junction) != NetNode.Flags.None)
-			// END MODIFICATION //
-			{
-				flags |= NetNode.Flags.TrafficLights;
-			}
-			else
-			{
-				flags &= ~NetNode.Flags.TrafficLights;
+				if (levelsSeenCount >= 2 || flag2)
+				{
+					flags |= NetNode.Flags.Transition;
+				}
+				else
+				{
+					flags &= ~NetNode.Flags.Transition;
+				}
+				// MODIFICATON //
+				// Logic for traffic light setting
+				if (wantTrafficLights && (isCrossing || incomingSegments > 2 || (incomingSegments >= 2 && attachedSegmentsWithLanes >= 3 && incomingLanes > 6)) && (flags & NetNode.Flags.Junction) != NetNode.Flags.None)
+				// END MODIFICATION //
+				{
+					flags |= NetNode.Flags.TrafficLights;
+				}
+				else
+				{
+					flags &= ~NetNode.Flags.TrafficLights;
+				}
 			}
 			data.m_flags = flags;
 		}
@@ -379,7 +411,10 @@ namespace Crossings
 		// NetNode override
 		private void RefreshJunctionData(ushort nodeID, int segmentIndex, ushort nodeSegment, Vector3 centerPos, ref uint instanceIndex, ref RenderManager.Instance data)
 		{
+			Debug.Log ("[Crossings] RefreshJunctionData6");
+			// MODIFICATION //
 			NetNode thisNode = NetManager.instance.m_nodes.m_buffer [nodeID];
+			// END MODIFICATION //
 			NetManager instance = Singleton<NetManager>.instance;
 			data.m_position = thisNode.m_position;
 			data.m_rotation = Quaternion.identity;
@@ -551,7 +586,9 @@ namespace Crossings
 			}
 			Vector4 colorLocation;
 			Vector4 vector21;
+			// **** MODIFICATION **** //
 			if (NetNode.BlendJunction(nodeID) || (thisNode.m_flags & (NetNode.Flags)CrossingFlag) == NetNode.Flags.None)
+			// **** END MODIFICATION **** //
 			{
 				colorLocation = RenderManager.GetColorLocation(86016u + (uint)nodeID);
 				vector21 = colorLocation;
@@ -571,7 +608,6 @@ namespace Crossings
 			}
 			instanceIndex = (uint)data.m_nextInstance;
 		}
-		
 	}
 }
 

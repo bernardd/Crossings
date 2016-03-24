@@ -36,8 +36,8 @@ namespace Crossings
 			input.m_ignoreTerrain = true;
 			if (RayCast(input, out output))
 			{
-				//Debug.Log("Found segment " + output.m_netSegment);
-				//Debug.Log("Found node " + output.m_netNode);
+				//Debug.Log("[Crossings] Found segment " + output.m_netSegment);
+				//Debug.Log("[Crossings] Found node " + output.m_netNode);
 				m_currentNodeID = output.m_netNode;
 				m_currentSegmentID = output.m_netSegment;
 			}
@@ -160,7 +160,7 @@ namespace Crossings
 
 		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo)
 		{
-			//Debug.Log ("Render Overlay");
+			//Debug.Log ("[Crossings] Render Overlay");
 			base.RenderOverlay(cameraInfo);
 
 			if (!this.m_toolController.IsInsideUI && Cursor.visible) {  /* && (this.m_cachedErrors & (ToolBase.ToolErrors.RaycastFailed | ToolBase.ToolErrors.Pending)) == ToolBase.ToolErrors.None*/
@@ -261,10 +261,10 @@ namespace Crossings
 				else
 					nodes = new ushort[] { nodeID };
 
-				//Debug.Log ("Segment flags: " + segment.m_flags);
+				//Debug.Log ("[Crossings] Segment flags: " + segment.m_flags);
 				foreach (ushort n in nodes) {
 					NetNode node = NetManager.instance.m_nodes.m_buffer [n];
-					//Debug.Log ("Node Flags: " + node.m_flags);
+					//Debug.Log ("[Crossings] Node Flags: " + node.m_flags);
 					float groundHeight = Singleton<TerrainManager>.instance.SampleRawHeightSmooth(node.m_position);
 					if (Mathf.Abs(node.m_position.y - groundHeight) > 11f) // Bridge
 						return false; // 4/6 lane bridges get their bridgework mucked up by crossings

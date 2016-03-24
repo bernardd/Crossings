@@ -27,22 +27,23 @@ namespace Crossings {
 				if (value == _toolEnabled) return;
 
 				_toolEnabled = value;
-
 				if (builtinTabstrip != null) {
+					Debug.Log ("[Crossings] builtinTabstrip.selectedIndex: " + builtinTabstrip.selectedIndex);
 					if (_toolEnabled) {
 						if (builtinTabstrip.selectedIndex >= 0) {
 							originalBuiltinTabsripSelectedIndex = builtinTabstrip.selectedIndex;
 						}
 
 						ignoreBuiltinTabstripEvents = true;
-						Debug.Log("Setting builtin tabstrip mode: " + (-1));
-						builtinTabstrip.selectedIndex = -1;
+						Debug.Log("[Crossings] Setting builtin tabstrip mode: " + (-1));
+					//	builtinTabstrip.selectedIndex = -1;
 						ignoreBuiltinTabstripEvents = false;
 					}
 					else if (builtinTabstrip.selectedIndex < 0 && originalBuiltinTabsripSelectedIndex >= 0) {
 						ignoreBuiltinTabstripEvents = true;
-						Debug.Log("Setting builtin tabstrip mode: " + originalBuiltinTabsripSelectedIndex);
-						builtinTabstrip.selectedIndex = originalBuiltinTabsripSelectedIndex;
+						Debug.Log("[Crossings] Setting builtin tabstrip mode: " + originalBuiltinTabsripSelectedIndex);
+						if (originalBuiltinTabsripSelectedIndex != -1)
+							builtinTabstrip.selectedIndex = originalBuiltinTabsripSelectedIndex;
 						ignoreBuiltinTabstripEvents = false;
 					}
 				}
@@ -91,6 +92,8 @@ namespace Crossings {
 
 			builtinTabstrip = UIUtils.Instance.FindComponent<UITabstrip>("ToolMode", roadsOptionPanel);
 			if (builtinTabstrip == null || !builtinTabstrip.gameObject.activeInHierarchy) return false;
+
+			Debug.Log ("[Crossings] Initial builtinTabstrip.selectedIndex: " + builtinTabstrip.selectedIndex);
 
 			button = UIUtils.Instance.FindComponent<UIButton>("CrossingsButton");
 			if (button != null) {

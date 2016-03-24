@@ -25,7 +25,7 @@ namespace Crossings {
 
 		public override void OnCreated(ILoading loading)
 		{
-			Debug.Log ("OnCreated()");
+			Debug.Log ("[Crossings] OnCreated()");
 			base.OnCreated (loading);
 
 			CrossingsNode.Hook ();
@@ -34,7 +34,7 @@ namespace Crossings {
 				SetToolEnabled(enabled);
 			};
 
-			Debug.Log ("OnCreated() complete");
+			Debug.Log ("[Crossings] OnCreated() complete");
 		}
 
 		public override void OnReleased()
