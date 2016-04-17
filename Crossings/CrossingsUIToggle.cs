@@ -26,10 +26,10 @@ namespace Crossings {
 
 				_toolEnabled = value;
 				if (builtinTabstrip != null) {
-					Debug.Log ("[Crossings] builtinTabstrip.selectedIndex: " + builtinTabstrip.selectedIndex);
+//					Debug.Log ("[Crossings] builtinTabstrip.selectedIndex: " + builtinTabstrip.selectedIndex);
 					if (_toolEnabled) {
 
-						Debug.Log("[Crossings] Setting builtin tabstrip mode: " + (-1));
+//						Debug.Log("[Crossings] Setting builtin tabstrip mode: " + (-1));
 					//	builtinTabstrip.selectedIndex = -1;
 					}
 				}
@@ -48,14 +48,14 @@ namespace Crossings {
 				if (!Initialize()) return;
 			}
 
-			Debug.Log("[Crossings] Showing UI");
+//			Debug.Log("[Crossings] Showing UI");
 			isVisible = true;
 		}
 
 		PropertyChangedEventHandler<int> builtinModeChangedHandler = null;
 
 		public void DestroyView() {
-			Debug.Log ("[Crossings] Destroying view");
+//			Debug.Log ("[Crossings] Destroying view");
 			if (button != null) {
 				if (builtinTabstrip != null) {
 					builtinTabstrip.eventSelectedIndexChanged -= builtinModeChangedHandler;
@@ -69,7 +69,7 @@ namespace Crossings {
 		}
 
 		bool Initialize() {
-			Debug.Log("[Crossings] Initializing UI");
+//			Debug.Log("[Crossings] Initializing UI");
 
 			if (UIUtils.Instance == null) return false;
 
@@ -79,7 +79,7 @@ namespace Crossings {
 			builtinTabstrip = UIUtils.Instance.FindComponent<UITabstrip>("ToolMode", roadsOptionPanel);
 			if (builtinTabstrip == null || !builtinTabstrip.gameObject.activeInHierarchy) return false;
 
-			Debug.Log ("[Crossings] Initial builtinTabstrip.selectedIndex: " + builtinTabstrip.selectedIndex);
+//			Debug.Log ("[Crossings] Initial builtinTabstrip.selectedIndex: " + builtinTabstrip.selectedIndex);
 
 			button = UIUtils.Instance.FindComponent<UIButton>("CrossingsButton");
 			if (button != null) {
@@ -94,7 +94,7 @@ namespace Crossings {
 		}
 
 		void CreateButton() {
-			Debug.Log("[Crossings] Creating button");
+//			Debug.Log("[Crossings] Creating button");
 
 			UIButton tabTemplate = (UIButton)builtinTabstrip.tabs[0];
 
@@ -139,7 +139,7 @@ namespace Crossings {
 			builtinTabstrip.eventSelectedIndexChanged += builtinModeChangedHandler;
 
 			button.eventClick += (UIComponent component, UIMouseEventParameter param) => {
-				Debug.Log("button.eventClick");
+//				Debug.Log("button.eventClick");
 				if (selectedToolModeChanged != null) selectedToolModeChanged(true);
 			};
 		}

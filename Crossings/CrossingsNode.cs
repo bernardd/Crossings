@@ -27,21 +27,21 @@ namespace Crossings
 			foreach (MethodInfo m in methods) {
 				if (m.Name == "RefreshJunctionData" && m.GetParameters ().Length == 6)
 				{
-					Debug.Log ("[Crossings] Hooking RefreshJunctionData");
+//					Debug.Log ("[Crossings] Hooking RefreshJunctionData");
 					redirects.Add (m, RedirectionHelper.RedirectCalls (m, typeof(CrossingsNode).GetMethod ("RefreshJunctionData", allFlags)));
 				}
 				else
 				{
-					Debug.Log ("[Crossings] Not hooking: " + m.Name + "/" + m.GetParameters().Length);
+//					Debug.Log ("[Crossings] Not hooking: " + m.Name + "/" + m.GetParameters().Length);
 				}
 						
 			}
 
-			Debug.Log ("[Crossings] Hooking UpdateNodeFlags");
+//			Debug.Log ("[Crossings] Hooking UpdateNodeFlags");
 			MethodInfo method = typeof(RoadBaseAI).GetMethod("UpdateNodeFlags", allFlags);
 			redirects.Add (method, RedirectionHelper.RedirectCalls (method, typeof(CrossingsNode).GetMethod ("UpdateNodeFlags", allFlags)));
 
-			Debug.Log ("[Crossings] Hooking CalculateNode");
+//			Debug.Log ("[Crossings] Hooking CalculateNode");
 			method = typeof(NetNode).GetMethod("CalculateNode", allFlags);
 			redirects.Add (method, RedirectionHelper.RedirectCalls (method, typeof(CrossingsNode).GetMethod ("CalculateNode", allFlags)));
 
@@ -52,7 +52,7 @@ namespace Crossings
 		// NetNode override
 		public void CalculateNode(ushort nodeID)
 		{
-			Debug.Log ("[Crossings] CalculateNode");
+//			Debug.Log ("[Crossings] CalculateNode");
 			// MODIFICATION //
 			NetNode thisNode = NetManager.instance.m_nodes.m_buffer [nodeID];
 			// END MODIFICATON //
@@ -64,8 +64,8 @@ namespace Crossings
 
 			// MODIFICATION //
 			bool isCrossing = (thisNode.m_flags & (NetNode.Flags)CrossingFlag) != NetNode.Flags.None;
-			if (isCrossing)
-				Debug.Log ("[Crossings] GOT A CROSSING NODE! " + nodeID);
+//			if (isCrossing)
+//				Debug.Log ("[Crossings] GOT A CROSSING NODE! " + nodeID);
 			// END MODIFICATON //
 			
 			NetManager instance = Singleton<NetManager>.instance;
@@ -300,7 +300,7 @@ namespace Crossings
 		// RoadBaseAI override
 		public void UpdateNodeFlags(ushort nodeID, ref NetNode data)
 		{
-			Debug.Log ("[Crossings] UpdateNodeFlags");
+//			Debug.Log ("[Crossings] UpdateNodeFlags");
 			// MODIFICATION //
 			NetInfo thisInfo = PrefabCollection<NetInfo>.GetPrefab(data.m_infoIndex);
 
@@ -411,7 +411,7 @@ namespace Crossings
 		// NetNode override
 		private void RefreshJunctionData(ushort nodeID, int segmentIndex, ushort nodeSegment, Vector3 centerPos, ref uint instanceIndex, ref RenderManager.Instance data)
 		{
-			Debug.Log ("[Crossings] RefreshJunctionData6");
+//			Debug.Log ("[Crossings] RefreshJunctionData6");
 			// MODIFICATION //
 			NetNode thisNode = NetManager.instance.m_nodes.m_buffer [nodeID];
 			// END MODIFICATION //

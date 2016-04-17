@@ -43,12 +43,12 @@ namespace Crossings {
 		}
 
 		public T FindComponent<T>(string name, UIComponent parent = null, FindOptions options = FindOptions.None) where T : UIComponent {
-			Debug.Log ("Finding name " + name);
+//			Debug.Log ("Finding name " + name);
 
 			if (uiRoot == null) {
 				FindUIRoot();
 				if (uiRoot == null) {
-					Debug.Log("[Crossings] UIRoot not found");
+//					Debug.Log("[Crossings] UIRoot not found");
 					return null;
 				}
 			}
@@ -72,11 +72,11 @@ namespace Crossings {
 
 				if (t == null) continue;
 
-				Debug.Log ("[Crossings] Found with name " + component.name);
+//				Debug.Log ("[Crossings] Found with name " + component.name);
 				return component;
 			}
 
-			Debug.Log("[Crossings] " + typeof(T) + " not found: " + name);
+//			Debug.Log("[Crossings] " + typeof(T) + " not found: " + name);
 
 			return null;
 		}
