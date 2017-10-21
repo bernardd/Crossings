@@ -28,7 +28,7 @@ namespace Crossings
 				if (m.Name == "RefreshJunctionData" && m.GetParameters ().Length == 6)
 				{
 //					Debug.Log ("[Crossings] Hooking RefreshJunctionData");
-					redirects.Add (m, RedirectionHelper.RedirectCalls (m, typeof(CrossingsNode).GetMethod ("RefreshJunctionData", allFlags)));
+					redirects.Add (m, RedirectionHelper.RedirectCalls (m, typeof(CrossingsNode).GetMethod ("RefreshJunctionData", allFlags))); // 1.9
 				}
 				else
 				{
@@ -39,17 +39,17 @@ namespace Crossings
 
 //			Debug.Log ("[Crossings] Hooking UpdateNodeFlags");
 			MethodInfo method = typeof(RoadBaseAI).GetMethod("UpdateNodeFlags", allFlags);
-			redirects.Add (method, RedirectionHelper.RedirectCalls (method, typeof(CrossingsNode).GetMethod ("UpdateNodeFlags", allFlags)));
+			redirects.Add (method, RedirectionHelper.RedirectCalls (method, typeof(CrossingsNode).GetMethod ("UpdateNodeFlags", allFlags))); // 1.9
 
 //			Debug.Log ("[Crossings] Hooking CalculateNode");
 			method = typeof(NetNode).GetMethod("CalculateNode", allFlags);
-			redirects.Add (method, RedirectionHelper.RedirectCalls (method, typeof(CrossingsNode).GetMethod ("CalculateNode", allFlags)));
+			redirects.Add (method, RedirectionHelper.RedirectCalls (method, typeof(CrossingsNode).GetMethod ("CalculateNode", allFlags))); // 1.9
 
 			hooked = true;
 
 		}
 
-		// NetNode override
+		// NetNode override -- VERIFIED for 1.9
 		public void CalculateNode(ushort nodeID)
 		{
 //			Debug.Log ("[Crossings] CalculateNode");
@@ -335,7 +335,7 @@ namespace Crossings
 			NetManager.instance.m_nodes.m_buffer [nodeID] = thisNode;
 		}
 
-		// RoadBaseAI override
+		// RoadBaseAI override -- VERIFIED FOR 1.9
 		public void UpdateNodeFlags(ushort nodeID, ref NetNode data)
 		{
 //			Debug.Log ("[Crossings] UpdateNodeFlags");
@@ -480,7 +480,7 @@ namespace Crossings
 			data.m_flags = flags;
 		}
 
-		// RoadBaseAI override - no modifications; imported due to privacy
+		// RoadBaseAI override - no modifications; imported due to privacy -- VERIFIED FOR 1.9
 		private bool CanEnableTrafficLights (ushort nodeID, ref NetNode data)
 		{
 			if ((data.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
@@ -507,7 +507,7 @@ namespace Crossings
 			return (num < 1 || num2 < 1) && ((data.m_flags & NetNode.Flags.OneWayIn) == NetNode.Flags.None || num3 != 0);
 		}
 
-		// NetNode override
+		// NetNode override -- VERIFIED for 1.9
 		private void RefreshJunctionData(ushort nodeID, int segmentIndex, ushort nodeSegment, Vector3 centerPos, ref uint instanceIndex, ref RenderManager.Instance data)
 		{
 			//			Debug.Log ("[Crossings] RefreshJunctionData6");

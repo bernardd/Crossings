@@ -103,7 +103,7 @@ namespace Crossings
 			this.m_mouseRay = Camera.main.ScreenPointToRay(mousePosition);
 			this.m_mouseRayLength = Camera.main.farClipPlane;
 			this.m_mouseRayValid = (!this.m_toolController.IsInsideUI && Cursor.visible);
-			base.ForceInfoMode(InfoManager.InfoMode.None, InfoManager.SubInfoMode.NormalPower);
+			ToolBase.ForceInfoMode(InfoManager.InfoMode.None, InfoManager.SubInfoMode.NormalPower);
 		}
 
 		override public void SimulationStep()
