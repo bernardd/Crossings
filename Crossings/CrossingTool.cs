@@ -37,7 +37,8 @@ namespace Crossings
 			if (RayCast(input, out output))
 			{
 				//Debug.Log("[Crossings] Found segment " + output.m_netSegment);
-				//Debug.Log("[Crossings] Found node " + output.m_netNode);
+//				Debug.Log("[Crossings] Found node " + output.m_netNode);
+//				Debug.Log("[Crossings] Found segment " + output.m_netSegment);
 				m_currentNodeID = output.m_netNode;
 				m_currentSegmentID = output.m_netSegment;
 			}
@@ -217,11 +218,11 @@ namespace Crossings
 					yield return null;
 				if (newNode == 0) {
 					NetTool.CreateNode (m_prefab, m_controlPoint, m_controlPoint, m_controlPoint, NetTool.m_nodePositionsSimulation, 0, false, false, true, false, false, false, 0, out newNode, out newSegment, out cost, out productionRate);
-					NetManager.instance.m_nodes.m_buffer [newNode].m_flags |= (NetNode.Flags)CrossingsNode.CrossingFlag;
+					NetManager.instance.m_nodes.m_buffer [newNode].m_flags |= (NetNode.Flags)Crossings.CrossingFlag;
 //					Debug.Log ("[Crossings] CreateNode real result: " + errors + " " + newNode + " " + newSegment + " " + cost + " " + productionRate);
 				} else {
-					NetManager.instance.m_nodes.m_buffer [newNode].m_flags |= (NetNode.Flags)CrossingsNode.CrossingFlag;
-					NetManager.instance.UpdateNode (newNode, 0, 0);
+					NetManager.instance.m_nodes.m_buffer [newNode].m_flags |= (NetNode.Flags)Crossings.CrossingFlag;
+					NetManager.instance.UpdateNode (newNode);
 //					Debug.Log ("[Crossings] Existing Node: " + newNode + " " + NetManager.instance.m_nodes.m_buffer [newNode].m_flags);
 				}
 			}
@@ -233,8 +234,8 @@ namespace Crossings
 		private IEnumerator RemoveCrossing()
 		{
 			if (m_currentNodeID != 0) {
-				NetManager.instance.m_nodes.m_buffer [m_currentNodeID].m_flags &= ~(NetNode.Flags)CrossingsNode.CrossingFlag;
-				NetManager.instance.UpdateNode (m_currentNodeID, 0, 0);
+				NetManager.instance.m_nodes.m_buffer [m_currentNodeID].m_flags &= ~(NetNode.Flags)Crossings.CrossingFlag;
+				NetManager.instance.UpdateNode(m_currentNodeID);
 				m_currentNodeID = 0;
 			}
 			yield return null;
@@ -275,7 +276,7 @@ namespace Crossings
 				return true; // No node means we can create one
 
 			NetNode.Flags flags = NetManager.instance.m_nodes.m_buffer [nodeID].m_flags;
-			if ((flags & (NetNode.Flags)CrossingsNode.CrossingFlag) != NetNode.Flags.None)
+			if ((flags & (NetNode.Flags)Crossings.CrossingFlag) != NetNode.Flags.None)
 				return true; // Already a crossing - can remove it
 
 			// Can't add crossing to the end, a junction (except a crossing one) or a bend
