@@ -1,11 +1,17 @@
 using ICities;
 using ColossalFramework.UI;
+using HarmonyLib;
 using UnityEngine;
 using System;
 using System.Reflection;
 
 
 namespace Crossings {
+	public class Crossings {
+		public static NetNode.Flags CrossingFlag = NetNode.Flags.Sewage; // Hopefully this won't break anything *fingers crossed*
+	}
+
+
 	public class CrossingsInfo : IUserMod {
 		public string Name {
 			get { return "Pedestrian Crossings"; }
@@ -28,7 +34,8 @@ namespace Crossings {
 //			Debug.Log ("[Crossings] OnCreated()");
 			base.OnCreated (loading);
 
-			CrossingsNode.Hook ();
+			var harmony = new Harmony("org.guarana.citiesskylines.mod.crossings");
+			harmony.PatchAll();
 
 			ui.selectedToolModeChanged += (bool enabled) => {
 				SetToolEnabled(enabled);
