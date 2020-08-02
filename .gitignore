@@ -77,3 +77,6 @@ obj
 Reference
 
 *.userprefs
+/packages/Lib.Harmony.2.0.1
+/packages/CitiesHarmony.API.1.0.5
+/.vs

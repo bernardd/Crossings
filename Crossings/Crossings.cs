@@ -1,7 +1,7 @@
 using ICities;
+using CitiesHarmony.API;
 using ColossalFramework.UI;
 using HarmonyLib;
-using UnityEngine;
 using System;
 using System.Reflection;
 
@@ -11,7 +11,6 @@ namespace Crossings {
 		public static NetNode.Flags CrossingFlag = NetNode.Flags.Sewage; // Hopefully this won't break anything *fingers crossed*
 	}
 
-
 	public class CrossingsInfo : IUserMod {
 		public string Name {
 			get { return "Pedestrian Crossings"; }
@@ -19,6 +18,10 @@ namespace Crossings {
 
 		public string Description {
 			get { return "Adds placeable pedestrian (zebra) crossings"; }
+		}
+		public void OnEnabled()
+		{
+			HarmonyHelper.EnsureHarmonyInstalled();
 		}
 	}
 	 
@@ -34,8 +37,7 @@ namespace Crossings {
 //			Debug.Log ("[Crossings] OnCreated()");
 			base.OnCreated (loading);
 
-			var harmony = new Harmony("org.guarana.citiesskylines.mod.crossings");
-			harmony.PatchAll();
+			if (HarmonyHelper.IsHarmonyInstalled) Patcher.PatchAll();
 
 			ui.selectedToolModeChanged += (bool enabled) => {
 				SetToolEnabled(enabled);
@@ -46,7 +48,9 @@ namespace Crossings {
 
 		public override void OnReleased()
 		{
-//			Debug.Log ("[Crossings] OnReleased()");
+			if (HarmonyHelper.IsHarmonyInstalled) Patcher.UnpatchAll();
+
+			//			Debug.Log ("[Crossings] OnReleased()");
 			ui.DestroyView();
 			DestroyBuildTool();
 
@@ -110,6 +114,30 @@ namespace Crossings {
 				CrossingTool.Destroy(buildTool);
 				buildTool = null;
 			}
+		}
+	}
+	
+	public static class Patcher
+	{
+		private const string HarmonyId = "org.guarana.citiesskylines.mod.crossings";
+		private static bool patched = false;
+
+		public static void PatchAll()
+		{
+			if (patched) return;
+
+			patched = true;
+			var harmony = new Harmony(HarmonyId);
+			harmony.PatchAll();
+		}
+
+		public static void UnpatchAll()
+		{
+			if (!patched) return;
+
+			var harmony = new Harmony(HarmonyId);
+			harmony.UnpatchAll(HarmonyId);
+			patched = false;
 		}
 	}
 

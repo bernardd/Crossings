@@ -36,10 +36,14 @@
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony, Version=2.0.0.8, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Lib.Harmony.2.0.0.8\lib\net35\0Harmony.dll</HintPath>
+    <Reference Include="0Harmony, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lib.Harmony.2.0.1\lib\net35\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="CitiesHarmony.API, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CitiesHarmony.API.1.0.5\lib\net35\CitiesHarmony.API.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="ColossalManaged">
@@ -79,7 +83,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>copy /Y "$(TargetDir)Crossings.dll" "C:\Users\Bernard\AppData\Local\Colossal Order\Cities_Skylines\Addons\Mods\Crossings\Crossings.dll"
+copy /Y "$(TargetDir)CitiesHarmony.API.dll" "C:\Users\Bernard\AppData\Local\Colossal Order\Cities_Skylines\Addons\Mods\Crossings\CitiesHarmony.API.dll"</PostBuildEvent>
   </PropertyGroup>
 </Project>
