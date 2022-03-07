@@ -77,3 +77,25 @@ obj
 Reference
 
 *.userprefs
+.vs/VSWorkspaceState.json
+.vs/slnx.sqlite
+.vs/ProjectSettings.json
+.vs/Crossings/v16/Server/sqlite3/storage.ide
+.vs/Crossings/v16/Server/sqlite3/db.lock
+.vs/Crossings/v16/.suo
+.vs/Crossings/v15/Server/sqlite3/storage.ide
+.vs/Crossings/v15/Server/sqlite3/db.lock
+.vs/Crossings/v15/.suo
+packages/CitiesHarmony.API.1.0.5/.signature.p7s
+packages/CitiesHarmony.API.1.0.5/CitiesHarmony.API.1.0.5.nupkg
+packages/CitiesHarmony.API.1.0.5/package_icon.png
+packages/Lib.Harmony.2.0.1/.signature.p7s
+packages/Lib.Harmony.2.0.1/HarmonyLogo.png
+packages/Lib.Harmony.2.0.1/Lib.Harmony.2.0.1.nupkg
+packages/Lib.Harmony.2.0.1/lib/net35/0Harmony.xml
+packages/Lib.Harmony.2.0.1/lib/net45/0Harmony.xml
+packages/Lib.Harmony.2.0.1/lib/net472/0Harmony.xml
+packages/Lib.Harmony.2.0.1/lib/net48/0Harmony.xml
+packages/Lib.Harmony.2.0.1/lib/netcoreapp3.0/0Harmony.xml
+packages/Lib.Harmony.2.0.1/lib/netcoreapp3.1/0Harmony.xml
+packages/Lib.Harmony.2.0.1/LICENSE

@@ -9,6 +9,7 @@ using System.Reflection;
 namespace Crossings {
 	public class Crossings {
 		public static NetNode.Flags CrossingFlag = NetNode.Flags.Sewage; // Hopefully this won't break anything *fingers crossed*
+		public const string settingsFilename = "Crossings";
 	}
 
 
