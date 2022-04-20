@@ -218,16 +218,59 @@ namespace Crossings
 					yield return null;
 				if (newNode == 0) {
 					NetTool.CreateNode (m_prefab, m_controlPoint, m_controlPoint, m_controlPoint, NetTool.m_nodePositionsSimulation, 0, false, false, true, false, false, false, 0, out newNode, out newSegment, out cost, out productionRate);
-					NetManager.instance.m_nodes.m_buffer [newNode].m_flags |= (NetNode.Flags)Crossings.CrossingFlag;
+					AddCrossingToFlags(ref NetManager.instance.m_nodes.m_buffer[newNode]);
 //					Debug.Log ("[Crossings] CreateNode real result: " + errors + " " + newNode + " " + newSegment + " " + cost + " " + productionRate);
 				} else {
-					NetManager.instance.m_nodes.m_buffer [newNode].m_flags |= (NetNode.Flags)Crossings.CrossingFlag;
+					AddCrossingToFlags(ref NetManager.instance.m_nodes.m_buffer[newNode]);
 					NetManager.instance.UpdateNode (newNode);
 //					Debug.Log ("[Crossings] Existing Node: " + newNode + " " + NetManager.instance.m_nodes.m_buffer [newNode].m_flags);
 				}
 			}
 
 			yield return null;
+		}
+		private static void AddCrossingToFlags(ref NetNode data)
+		{
+			data.m_flags |= Crossings.CrossingFlag;
+
+			var ai = data.Info.m_netAI;
+
+			bool wantTrafficLights = ai.WantTrafficLights();
+			NetManager netManager = Singleton<NetManager>.instance;
+
+			//Debug.Log("isCrossing: " + isCrossing);
+			//Debug.Log("wantTrafficLights: " + wantTrafficLights);
+
+			if (!wantTrafficLights)
+			{
+				for (int i = 0; i < 8; i++)
+				{
+					ushort segment = data.GetSegment(i);
+					if (segment != 0)
+					{
+						NetInfo info = netManager.m_segments.m_buffer[(int)segment].Info;
+						if (info != null)
+						{
+							if ((info.m_vehicleTypes & VehicleInfo.VehicleType.Train) != VehicleInfo.VehicleType.None)
+							{
+								// No crossings allowed where there's a railway intersecting
+								return;
+							}
+
+							if (info.m_netAI.WantTrafficLights())
+							{
+								wantTrafficLights = true;
+							}
+						}
+					}
+				}
+			}
+
+			if (wantTrafficLights)
+			{
+				data.m_flags |= NetNode.Flags.TrafficLights | NetNode.Flags.CustomTrafficLights;
+			}
+
 		}
 
 
